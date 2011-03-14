@@ -1,0 +1,90 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage{graphicx}
+\usepackage{verbatim}
+\usepackage{moreverb}
+\usepackage{fontspec}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage[german]{babel}
+\usepackage[24hr]{datetime}
+\usepackage[latin1]{inputenc}
+\let\verbatiminput=\verbatimtabinput %tabs are ignored in verbatim, this corrects for that
+\def\verbatimtabsize{4\relax} % set tabs=4 (else my output goes off the screen)
+
+\write18{bash bin/producedata.sh examples/afh.conf ../data/current.ledger}
+%\write18{python degree_tree.py} %run to produce example graph file
+
+\usepackage{fullpage}
+
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+\begin{document}
+
+\input{templates/afh/title.tex}
+
+\tableofcontents
+
+\chapter*{Einleitung}
+
+``I kept account of every farthing I spent, and my expenses were carefully calculated. 
+Every little item, such as omnibus fares or postage or a couple of coppers spent on newspapers, would be entered, and the balance struck every evening before going to bed.
+That habit has stayed with me ever since, and I know that as a result, though I have had to handle public funds amounting to lakhs, I have succeeded in exercising strict economy in their disbursement, and instead of outstanding debts have had invariably a surplus balance in respect of all the movements I have led.
+Let every youth take a leaf out of my book and make it a point to account for everything that comes into and goes out of his pocket, and like me he is sure to be a gainer in the end.
+'' -- M.K.Gandhi autobiography
+
+\chapter{Budget}
+
+\includegraphics{build/month_breakdown.png}\\[1cm]
+
+\verbatiminput{../data/budget_inc.ledger}
+
+\section{Verlauf des aktuellen Monats}
+
+Negative Werte zeigen verfügbare Mittel an.  Positive Werte weisen auf Verausgabungen hin.
+
+\verbatiminput{build/budget.txt}
+
+\chapter{Aktiva}
+
+\verbatiminput{build/assets.txt}
+
+\chapter{Passiva}
+
+\verbatiminput{build/liabilities.txt}
+
+\chapter{Transaktionen}
+
+\section{Girokonto}
+
+Saldo des letzten Jahres bis dato :
+
+\input{build/checking-1yearbalance.tex}
+
+Saldo im \monthname :
+
+\input{build/checking-1monthbalance.tex}
+
+Transaktionen der letzen 7 Tage :
+
+\verbatiminput{build/checking-1trans.txt}
+
+
+\chapter{Netto Wert}
+
+\begin{itemize}
+
+\item Die Bilanz meiner Aktiva zu meinen Passiva zeigt den Netto Wert: \input{build/networth.txt}
+\item Abzüglich langfristiger Investitionen und dem Darlehenskonto ist meine Liquidität \input{build/liquidity.txt}
+\item Die Ausgaben mit den Einnahmen zu verrechnen zeigt den Kapitalfluss, oder den Netto-Gewinn, bzw. -Verlust (negativ = Gewinn, positiv = Verlust): \input{build/cashflow.txt}
+
+\end{itemize}
+
+\chapter{Prognose}
+
+\section{Girokonto}
+
+\input{build/checking-1forecast.tex}
+
+\verbatiminput{build/checking-1forecast.txt}
+
+\end{document}

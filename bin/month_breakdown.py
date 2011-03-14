@@ -25,13 +25,13 @@ sys.path.insert(0, os.path.join(ROOT, '..'))
 from pygooglechart import PieChart2D
 from pygooglechart import PieChart3D
 
-width = 600
-height = 400
+width = 550
+height = 200
 
-def month_breakdown():
+def month_breakdown(file):
 
     #open file
-    f = open('month_breakdown.txt')
+    f = open(file)
     #create two lists
     values = []
     labels = []
@@ -51,7 +51,7 @@ def month_breakdown():
     chart.set_pie_labels(labels)
 
     # Download the chart
-    chart.download('monthbreakdown.png')
+    chart.download(file.replace('txt', 'png'))
 
 
 
@@ -85,7 +85,10 @@ def house_explosions():
 
 def main():
 #    hello_world()
-    month_breakdown()
+    filename = 'month_breakdown.txt'
+    if sys.argv[1]:
+      filename = sys.argv[1]
+    month_breakdown(filename)
 #    house_explosions()
 
 if __name__ == '__main__':

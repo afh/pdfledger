@@ -7,7 +7,7 @@
 \let\verbatiminput=\verbatimtabinput %tabs are ignored in verbatim, this corrects for that
 \def\verbatimtabsize{4\relax} % set tabs=4 (else my output goes off the screen)
 
-\write18{bash producedata.sh}
+\write18{bash producedata.sh ../../examples/afh.conf ../data/current.ledger}
 %\write18{python degree_tree.py} %run to produce example graph file
 
 \usepackage{fullpage}
@@ -17,7 +17,7 @@
 
 \begin{document}
 
-\input{./title.tex}
+\input{templates/bettse/title.tex}
 
 \tableofcontents
 
@@ -31,7 +31,7 @@ Let every youth take a leaf out of my book and make it a point to account for ev
 
 \chapter{Budget}
 
-\includegraphics[width=0.75\textwidth]{./monthbreakdown}\\[1cm]    
+\includegraphics{build/month_breakdown.png}\\[1cm]
 
 
 \verbatiminput{/Users/bettse/Dropbox/Finances/budget.lgr}
@@ -40,15 +40,15 @@ Let every youth take a leaf out of my book and make it a point to account for ev
 
 Negative values indicate to-be-spent funds.  Positive vaues indicate overspending.
 
-\verbatiminput{budget.txt}
+\verbatiminput{build/budget.txt}
 
 \chapter{Assets}
 
-\verbatiminput{assets.txt}
+\verbatiminput{build/assets.txt}
 
 \chapter{Liabilities}
 
-\verbatiminput{liabilities.txt}
+\verbatiminput{build/liabilities.txt}
 
 \chapter{Transactions}
 
@@ -56,31 +56,31 @@ Negative values indicate to-be-spent funds.  Positive vaues indicate overspendin
 
 Balance over the last year to date :
 
-\input{OSUyearbalance.tex}
+\input{build/checking-1yearbalance.tex}
 
 
 Balance during \monthname :
 
-\input{OSUmonthbalance.tex}
+\input{build/checking-1monthbalance.tex}
 
 Transactions for the last 7 days:
 
-\verbatiminput{OSUtrans.txt}
+\verbatiminput{build/checking-1trans.txt}
 
 \section{First Tech Credit Union}
 
 Balance over the last year to date :
 
-\input{FirstTechyearbalance.tex}
+\input{build/checking-2yearbalance.tex}
 
 
 Balance during \monthname :
 
-\input{FirstTechmonthbalance.tex}
+\input{build/checking-2monthbalance.tex}
 
 Transactions for the last 7 days:
 
-\verbatiminput{firsttrans.txt}
+\verbatiminput{build/checking-2trans.txt}
 
 
 
@@ -88,9 +88,9 @@ Transactions for the last 7 days:
 
 \begin{itemize}
 
-\item The balance of my assets to my liabilities gives my net worth (including retirement funds): \input{networth.txt}
-\item Removing long term investment and loan accounts gives my net liquidity: \input{liquidity.txt}
-\item Balancing expenses against income yields your cash flow, or net profit/loss(negative is profit, positive is loss): \input{cashflow.txt}
+\item The balance of my assets to my liabilities gives my net worth (including retirement funds): \input{build/networth.txt}
+\item Removing long term investment and loan accounts gives my net liquidity: \input{build/liquidity.txt}
+\item Balancing expenses against income yields your cash flow, or net profit/loss(negative is profit, positive is loss): \input{build/cashflow.txt}
 
 \end{itemize}
 
@@ -98,14 +98,14 @@ Transactions for the last 7 days:
 
 \section{OSU Federal Credit Union}
 
-\input{OSUforecast.tex}
+\input{build/checking-1forecast.tex}
 
-\verbatiminput{OSUforecast.txt}
+\verbatiminput{build/checking-1forecast.txt}
 
 \section{First Tech Credit Union}
 
-\input{FirstTechforecast.tex}
+\input{build/checking-2forecast.tex}
 
-\verbatiminput{FirstTechforecast.txt}
+\verbatiminput{build/checking-2forecast.txt}
 
 \end{document}

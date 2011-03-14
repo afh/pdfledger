@@ -1,10 +1,12 @@
+LATEX="xelatex"
+LEDGER="templates/afh/pdfledger.tex"
+CABINET="/Users/bettse/Dropbox/Virtual\ Filing\ Cabinet/"
+
 default:
-	@pdflatex --enable-write18 -shell-escape pdfledger.tex 
-#@cp pdfledger.pdf /Users/bettse/Dropbox/Virtual\ Filing\ Cabinet/Bank/
+	@$(LATEX) --enable-write18 -shell-escape --output-directory=build $(LEDGER)
+
+file: default
+	@cp build/pdfledger.pdf $(CABINET)/Bank
 
 clean:
-	rm *.txt
-	rm *.log
-	rm *.png
-	rm *.aux
-	rm *.pdf
+	rm -f build/*
