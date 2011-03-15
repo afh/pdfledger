@@ -30,5 +30,4 @@ ledger -f "${ledgerfile}" -w -c -F "%(account)\t%(total)\n" -p "this month" bal 
   | grep -P -v $month_grep_v \
   > $build/month_breakdown.txt
 
-python $bin/month_breakdown.py $build/month_breakdown.txt
-
+python $bin/pie.py "$build/" -f "${ledgerfile}"
