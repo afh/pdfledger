@@ -26,7 +26,9 @@ def usage():
 
 years    = mdates.YearLocator()   # every year
 months   = mdates.MonthLocator()  # every month
+days     = mdates.DayLocator()
 yearsFmt = mdates.DateFormatter('%Y')
+monthsFmt = mdates.DateFormatter('%m-%d')
 
 if len(sys.argv) > 2:
     output_file = sys.argv[1]
@@ -48,13 +50,24 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.plot(times, values)
 
-# format the ticks
-ax.xaxis.set_major_locator(years)
-ax.xaxis.set_major_formatter(yearsFmt)
-ax.xaxis.set_minor_locator(months)
 
-datemin = datetime.date(min(times).year, 1, 1)
-datemax = datetime.date(max(times).year+1, 1, 1)
+daterange = datetime.timedelta(int(round((max(times) - min(times)).days * .10)))
+
+
+# format the ticks
+if(daterange.days > 30):
+    ax.xaxis.set_major_locator(years)
+    ax.xaxis.set_major_formatter(yearsFmt)
+    ax.xaxis.set_minor_locator(months)
+else:
+    ax.xaxis.set_major_locator(months)
+    ax.xaxis.set_major_formatter(monthsFmt)
+    ax.xaxis.set_minor_locator(days)
+
+
+
+datemin = min(times) - daterange
+datemax = max(times) + daterange
 ax.set_xlim(datemin, datemax)
 
 # format the coords message box
