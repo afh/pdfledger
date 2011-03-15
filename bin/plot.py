@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Show how to make date plots in matplotlib using date tick locators and
 formatters.  See major_minor_demo1.py for more information on
@@ -23,7 +24,8 @@ import matplotlib.ticker as ticker
 from subprocess import Popen,PIPE
 import sys
 
-def price(x): return '$%1.2f'%x
+currency='€'
+def price(x): return '%s%1.2f'%(x,currency)
 def usage():
     print "Usage: " + sys.argv[0] + " <imagename> <paramters1> <parameter2> ..."
 
@@ -34,7 +36,7 @@ weeks    = mdates.WeekdayLocator(byweekday=mdates.MO, interval=1)
 yearsFmt = mdates.DateFormatter('%Y')
 monthsFmt = mdates.DateFormatter('%m/%Y')
 daysFmt = mdates.DateFormatter('%m/%d')
-moneyFmt = ticker.FormatStrFormatter('$%1.2f')
+moneyFmt = ticker.FormatStrFormatter(unicode('%s%%1.2f'%currency, 'utf-8'))
 
 if len(sys.argv) > 2:
     output_file = sys.argv[1]
