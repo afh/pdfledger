@@ -55,21 +55,18 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.plot(times, values)
 
-
-daterange = datetime.timedelta(int(round((max(times) - min(times)).days * .10)))
-
-
+daterange = (max(times) - min(times)).days
 # format the ticks
-if((max(times) - min(times)).days < 15 ):
+if(daterange < 15 ):
     ax.xaxis.set_major_locator(days)
     ax.xaxis.set_major_formatter(daysFmt)
-if((max(times) - min(times)).days < 35 ):
+if(daterange < 35 ):
     ax.xaxis.set_major_locator(weeks)
     ax.xaxis.set_major_formatter(daysFmt)
-elif((max(times) - min(times)).days < 90):
+elif(daterange < 90):
     ax.xaxis.set_major_locator(weeks)
     ax.xaxis.set_major_formatter(monthsFmt)
-elif((max(times) - min(times)).days < 400):
+elif(daterange < 400):
     ax.xaxis.set_major_locator(months)
     ax.xaxis.set_major_formatter(monthsFmt)
 else:
@@ -78,6 +75,7 @@ else:
 
 ax.yaxis.set_major_formatter(moneyFmt)
 
+daterange = datetime.timedelta(int(round(daterange * .05)))
 datemin = min(times) - daterange
 datemax = max(times) + daterange
 ax.set_xlim(datemin, datemax)
