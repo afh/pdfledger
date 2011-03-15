@@ -39,4 +39,4 @@ ax = axes([0.1, 0.1, 0.8, 0.8])
 
 pie(values, explode=None, labels=labels, autopct='%1.1f%%', shadow=False)
 
-savefig(output_loc+"monthexpensepie.png")
+savefig(output_loc+"monthexpensepie.pdf")

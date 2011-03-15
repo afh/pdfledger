@@ -90,4 +90,4 @@ ax.grid(True)
 # axes up to make room for them
 fig.autofmt_xdate()
 
-plt.savefig(output_file+".png")
+plt.savefig(output_file+".pdf")
