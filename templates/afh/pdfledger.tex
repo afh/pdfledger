@@ -17,6 +17,7 @@
 
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\newcommand{\insertplot}[1]{\includegraphics[width=0.9\linewidth, keepaspectratio=true]{build/#1}\\[1cm]}
 
 \begin{document}
 
@@ -34,7 +35,10 @@ Let every youth take a leaf out of my book and make it a point to account for ev
 
 \chapter{Budget}
 
-\includegraphics{build/month_breakdown.png}\\[1cm]
+\begin{figure}
+\caption{Kostenaufschlüsselung des aktuellen Monats}
+\insertplot{monthexpensepie}
+\end{figure}
 
 \verbatiminput{../data/budget_inc.ledger}
 
@@ -58,16 +62,15 @@ Negative Werte zeigen verfügbare Mittel an.  Positive Werte weisen auf Verausga
 
 Saldo des letzten Jahres bis dato :
 
-\input{build/checking-1yearbalance.tex}
+\insertplot{checking-1yearbalance}
 
 Saldo im \monthname :
 
-\input{build/checking-1monthbalance.tex}
+\insertplot{checking-1monthbalance}
 
 Transaktionen der letzen 7 Tage :
 
 \verbatiminput{build/checking-1trans.txt}
-
 
 \chapter{Netto Wert}
 
@@ -83,7 +86,7 @@ Transaktionen der letzen 7 Tage :
 
 \section{Girokonto}
 
-\input{build/checking-1forecast.tex}
+\insertplot{checking-1forecast}
 
 \verbatiminput{build/checking-1forecast.txt}
 
