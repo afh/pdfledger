@@ -10,6 +10,8 @@ and adding a shadow.
 Requires matplotlib0-0.70 or later
 
 """
+import matplotlib
+matplotlib.use('Agg')
 from pylab import *
 from subprocess import Popen,PIPE
 import sys
