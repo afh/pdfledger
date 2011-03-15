@@ -49,7 +49,7 @@ for line in output.split('\n'):
     if(line == ""):
         continue
     times.append(datetime.datetime.strptime(line.split()[0], "%Y-%m-%d"))
-    values.append(float(line.split()[1]))
+    values.append(float(line.split()[1].replace(',', '.')))
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
