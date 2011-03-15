@@ -18,17 +18,22 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.mlab as mlab
 import matplotlib.cbook as cbook
+import matplotlib.ticker as ticker
 from subprocess import Popen,PIPE
 import sys
 
+def price(x): return '$%1.2f'%x
 def usage():
     print "Usage: " + sys.argv[0] + " <imagename> <paramters1> <parameter2> ..."
 
 years    = mdates.YearLocator()   # every year
 months   = mdates.MonthLocator()  # every month
-days     = mdates.DayLocator()
+days     = mdates.DayLocator()    # every day
+weeks    = mdates.WeekdayLocator(byweekday=MO, interval=1)
 yearsFmt = mdates.DateFormatter('%Y')
-monthsFmt = mdates.DateFormatter('%m-%d')
+monthsFmt = mdates.DateFormatter('%m/%Y')
+daysFmt = mdates.DateFormatter('%m/%d')
+moneyFmt = ticker.FormatStrFormatter('$%1.2f')
 
 if len(sys.argv) > 2:
     output_file = sys.argv[1]
@@ -55,23 +60,29 @@ daterange = datetime.timedelta(int(round((max(times) - min(times)).days * .10)))
 
 
 # format the ticks
-if(daterange.days > 30):
-    ax.xaxis.set_major_locator(years)
-    ax.xaxis.set_major_formatter(yearsFmt)
-    ax.xaxis.set_minor_locator(months)
-else:
+if((max(times) - min(times)).days < 15 ):
+    ax.xaxis.set_major_locator(days)
+    ax.xaxis.set_major_formatter(daysFmt)
+if((max(times) - min(times)).days < 35 ):
+    ax.xaxis.set_major_locator(weeks)
+    ax.xaxis.set_major_formatter(daysFmt)
+elif((max(times) - min(times)).days < 90):
+    ax.xaxis.set_major_locator(weeks)
+    ax.xaxis.set_major_formatter(monthsFmt)
+elif((max(times) - min(times)).days < 400):
     ax.xaxis.set_major_locator(months)
     ax.xaxis.set_major_formatter(monthsFmt)
-    ax.xaxis.set_minor_locator(days)
+else:
+    ax.xaxis.set_major_locator(years)
+    ax.xaxis.set_major_formatter(yearsFmt)
 
-
+ax.yaxis.set_major_formatter(moneyFmt)
 
 datemin = min(times) - daterange
 datemax = max(times) + daterange
 ax.set_xlim(datemin, datemax)
 
 # format the coords message box
-def price(x): return '$%1.2f'%x
 ax.format_xdata = mdates.DateFormatter('%Y-%m-%d')
 ax.format_ydata = price
 ax.grid(True)
