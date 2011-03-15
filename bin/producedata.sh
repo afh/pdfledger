@@ -9,36 +9,8 @@ test -e $build || mkdir -p $build
 
 . $config
 
-function plotbalance {
-    bank=$1
-    currency=EUR # USD
-    shift
-    (cat <<EOF; ledger "$@") | LC_ALL=de_DE gnuplot
-        set terminal latex
-        set output "${build}/${bank}balance.tex"
-        set xdata time
-        set timefmt "%Y-%m-%d"
-        set format x "%d"
-        plot "-" using 1:2 title "${currency}" with lines
-EOF
-}
-
-function plotforecast {
-    bank=$1
-    currency=EUR # USD
-    shift
-    (cat <<EOF; ledger "$@") | LC_ALL=de_DE gnuplot
-        set terminal latex
-        set output "${build}/${bank}forecast.tex"
-        set xdata time
-        set timefmt "%Y-%m-%d"
-        set format x "%b"
-        plot "-" using 1:2 title "${currency}" with lines
-EOF
-}
-
 #These are used to produce text output that will be verbatim included in the report
-ledger -f "${ledgerfile}" -w -c -E -p "this month" --budget -M bal $budget_accounts > $build/budget.txt
+ledger -f "${ledgerfile}" -c -E -p "this month" budget $budget_accounts > $build/budget.txt
 ledger -f "${ledgerfile}" --sort d -d "d>[today]-7" -c reg $checking_1 > $build/checking-1trans.txt
 ledger -f "${ledgerfile}" --forecast "d<=[today]+365" -d "d>[today] & d<[today]+365" --sort d reg $checking_1_forecast | sed -e 's/Forecast transaction/Prognose/' > $build/checking-1forecast.txt
 ledger -f "${ledgerfile}" -w -c bal $assets_account > $build/assets.txt
