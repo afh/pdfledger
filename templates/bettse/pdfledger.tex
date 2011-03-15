@@ -14,6 +14,7 @@
 
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\newcommand{\insertplot}[1]{\includegraphics[width=0.9\linewidth, keepaspectratio=true]{build/#1}\\[1cm]}
 
 \begin{document}
 
@@ -31,8 +32,7 @@ Let every youth take a leaf out of my book and make it a point to account for ev
 
 \chapter{Budget}
 
-\includegraphics{build/month_breakdown.png}\\[1cm]
-
+\insertplot{month_breakdown}
 
 \verbatiminput{/Users/bettse/Dropbox/Finances/budget.lgr}
 
@@ -56,18 +56,15 @@ Negative values indicate to-be-spent funds.  Positive vaues indicate overspendin
 
 Balance over the last year to date :
 
-\includegraphics[width=0.8\linewidth, keepaspectratio=true]{build/checking-1yearbalance}\\[1cm]    
-
+\insertplot{checking-1yearbalance}
 
 Balance during \monthname :
 
-\includegraphics[width=0.8\linewidth, keepaspectratio=true]{build/checking-1monthbalance}\\[1cm]    
+\insertplot{checking-1monthbalance}
 
 Transactions for the last 7 days:
 
 \verbatiminput{build/checking-1trans.txt}
-
-
 
 \chapter{Net Worth}
 
@@ -83,7 +80,7 @@ Transactions for the last 7 days:
 
 \section{First Tech Credit Union}
 
-\includegraphics[width=0.8\linewidth, keepaspectratio=true]{build/checking-1forecast}\\[1cm]    
+\insertplot{checking-1forecast}
 
 \verbatiminput{build/checking-1forecast.txt}
 
