@@ -21,12 +21,12 @@ if len(sys.argv) > 1:
 if len(sys.argv) > 2:
     parameters = sys.argv[2:]
 
-parameters += ['-p', 'this month','--flat', 'balance', 'Expenses']
+parameters += ['-p', 'this month','--flat', '--no-total', 'balance', 'Expenses']
 output = Popen(["ledger"] + parameters, stdout=PIPE).communicate()[0]
 labels = []
 values = []
 for line in output.split('\n'):
-    if(line == "" or line.find("Expenses") == -1):
+    if(line == ""):
         continue
     values.append(float(line.split()[0]))
     labels.append(line.split()[2])
