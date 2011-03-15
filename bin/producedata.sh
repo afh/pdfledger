@@ -25,4 +25,4 @@ python $bin/plot.py "${build}/${bank}checking-1yearbalance" -f "${ledgerfile}" -
 
 python $bin/plot.py "${build}/${bank}checking-1forecast" -f "${ledgerfile}" -J -w --forecast "d<=[today]+365" -d "d>=[next month] & d<=[today]+365" --sort d reg $checking_1_forecast
 
-python $bin/pie.py "$build/" -f "${ledgerfile}"
+python $bin/pie.py "$build/" -f "${ledgerfile}" $expenses_account $balance

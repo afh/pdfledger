@@ -21,7 +21,7 @@ if len(sys.argv) > 1:
 if len(sys.argv) > 2:
     parameters = sys.argv[2:]
 
-parameters += ['-p', 'this month','--flat', '--no-total', 'balance', 'Expenses']
+parameters += ['-p', 'this month','--flat', '--no-total']
 output = Popen(["ledger"] + parameters, stdout=PIPE).communicate()[0]
 labels = []
 values = []
@@ -36,6 +36,5 @@ figure(1, figsize=(8,8))
 ax = axes([0.1, 0.1, 0.8, 0.8])
 
 pie(values, explode=None, labels=labels, autopct='%1.1f%%', shadow=False)
-title('Breakdown of this months expenses', bbox={'facecolor':'0.8', 'pad':5})
 
 savefig(output_loc+"monthexpensepie.png")
