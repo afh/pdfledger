@@ -29,7 +29,7 @@ def usage():
 years    = mdates.YearLocator()   # every year
 months   = mdates.MonthLocator()  # every month
 days     = mdates.DayLocator()    # every day
-weeks    = mdates.WeekdayLocator(byweekday=MO, interval=1)
+weeks    = mdates.WeekdayLocator(byweekday=mdates.MO, interval=1)
 yearsFmt = mdates.DateFormatter('%Y')
 monthsFmt = mdates.DateFormatter('%m/%Y')
 daysFmt = mdates.DateFormatter('%m/%d')
