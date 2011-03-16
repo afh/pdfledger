@@ -17,26 +17,32 @@ from subprocess import Popen,PIPE
 import sys
 
 
-output_loc = "./"
-if len(sys.argv) > 1:
-    output_loc = sys.argv[1]
-if len(sys.argv) > 2:
-    parameters = sys.argv[2:]
+def main(output_loc, parameters):
+    parameters += ['-p', 'this month','--flat', '--no-total']
+    output = Popen(["ledger"] + parameters, stdout=PIPE).communicate()[0]
+    labels = []
+    values = []
+    for line in output.split('\n'):
+        if(line == ""):
+            continue
+        values.append(float(line.split()[0]))
+        labels.append(line.split()[2])
 
-parameters += ['-p', 'this month','--flat', '--no-total']
-output = Popen(["ledger"] + parameters, stdout=PIPE).communicate()[0]
-labels = []
-values = []
-for line in output.split('\n'):
-    if(line == ""):
-        continue
-    values.append(float(line.split()[0]))
-    labels.append(line.split()[2])
+    # make a square figure and axes
+    figure(1, figsize=(8,8))
+    ax = axes([0.1, 0.1, 0.8, 0.8])
 
-# make a square figure and axes
-figure(1, figsize=(8,8))
-ax = axes([0.1, 0.1, 0.8, 0.8])
+    pie(values, explode=None, labels=labels, autopct='%1.1f%%', shadow=False)
 
-pie(values, explode=None, labels=labels, autopct='%1.1f%%', shadow=False)
+    savefig(output_loc+"monthexpensepie.pdf")
 
-savefig(output_loc+"monthexpensepie.pdf")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 2:
+        main(sys.argv[1], sys.argv[2:])
+    elif len(sys.argv) > 1:
+        main("./", sys.argv[2:])
+    else:
+        exit()
+
