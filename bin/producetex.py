@@ -35,10 +35,10 @@ def main():
 
     print header
 
-    pie.main("../build/", ['-f', LEDGER_FILE, 'Expenses', 'bal'])
+    pie.main("../build/", ['-f', LEDGER_FILE, 'balance', 'Expenses'])
     print budget
 
-    output = Popen(ledger + commands['accts'], stdout=PIPE).communicate()[0]
+    output = runledger(commands['accts'])
     accts = []
     for line in output.split('\n'):
         if(line == ""): continue
@@ -50,7 +50,7 @@ def main():
         print "\chapter{" + acct + "}"
 
         subaccts = []
-        output = Popen(ledger + commands['retrospective'] + ["^"+acct], stdout=PIPE).communicate()[0]
+        output = runledger(commands['retrospective'] + ["^"+acct])
         for line in output.split('\n'):
             if(line == ""): continue
             subaccts += line.split(acct)[-1:]
@@ -65,7 +65,7 @@ def main():
         for subacct in subaccts:
             fullname = acct + ":" + subacct
             #print retrospective of subaccts with at least 7 transactions when viewed weekly over the last 12 months
-            output = Popen(ledger + commands['last12months'] + ['-J', 'register'] + ["^" + fullname], stdout=PIPE).communicate()[0]
+            output = runledger(commands['last12months'] + ['-J', 'register'] + ["^" + fullname])
             if(len(output.split('\n')) < 6): continue
 
             print "\section{" + subacct + " Retrospective}"
@@ -77,7 +77,7 @@ def main():
 
         #identify budgeted subaccts
         subaccts = []
-        output = Popen(ledger + commands['acctbudget'] + ["^"+acct], stdout=PIPE).communicate()[0]
+        output = runledger(commands['acctbudget'] + ["^"+acct])
         for line in output.split('\n'):
             if(line == ""): continue
             subaccts += line.split(acct)[-1:]
@@ -166,7 +166,7 @@ budget = r"""
 Negative values indicate to-be-spent funds.  Positive vaues indicate overspending.
 
 \begin{verbatim}
-""" + Popen(ledger + commands['budget'], stdout=PIPE).communicate()[0] + """
+""" + runledger(commands['budget']) + """
 \end{verbatim}
 """
 
