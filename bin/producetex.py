@@ -27,6 +27,10 @@ exclude['acct'] = ['Equity']
 exclude['retrospective'] = ['Expenses', 'Cash']
 exclude['forecast'] = ['Equity', 'Salary']
 
+def runledger(cmd):
+    return Popen(ledger + cmd, stdout=PIPE).communicate()[0]
+
+
 def main():
 
     print header
@@ -106,9 +110,9 @@ summary = r"""
 
 \begin{itemize}
 
-\item The balance of my assets to my liabilities gives my net worth (including retirement funds): """ + Popen(ledger + commands['networth'], stdout=PIPE).communicate()[0].replace("Assets", "").strip() + """
-\item Removing long term investment and loan accounts gives my net liquidity: """ + Popen(ledger + commands['networth'], stdout=PIPE).communicate()[0].replace("Assets", "").strip() + """
-\item Balancing expenses against income yields your cash flow, or net profit/loss(negative is profit, positive is loss): """ + Popen(ledger + commands['networth'], stdout=PIPE).communicate()[0].replace("Assets", "").strip() + """
+\item The balance of my assets to my liabilities gives my net worth (including retirement funds): """ + runledger(commands['networth']).replace("Assets", "").strip() + """
+\item Removing long term investment and loan accounts gives my net liquidity: """ + runledger(commands['networth']).replace("Assets", "").strip() + """
+\item Balancing expenses against income yields your cash flow, or net profit/loss(negative is profit, positive is loss): """ + runledger(commands['networth']).replace("Assets", "").strip() + """
 
 \end{itemize}
 """
