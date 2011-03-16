@@ -38,58 +38,61 @@ monthsFmt = mdates.DateFormatter('%m/%Y')
 daysFmt = mdates.DateFormatter('%m/%d')
 moneyFmt = ticker.FormatStrFormatter(unicode('%s%%1.2f'%currency, 'utf-8'))
 
-if len(sys.argv) > 2:
-    output_file = sys.argv[1]
-    parameters = sys.argv[2:]
-else:
-    usage()
-    exit()
+def main(output_file, parameters):
+    output = Popen(["ledger"] + parameters, stdout=PIPE).communicate()[0]
+    times = []
+    values = []
+    for line in output.split('\n'):
+        if(line == ""):
+            continue
+        times.append(datetime.datetime.strptime(line.split()[0], "%Y-%m-%d"))
+        values.append(float(line.split()[1].replace(',', '.')))
 
-output = Popen(["ledger"] + parameters, stdout=PIPE).communicate()[0]
-times = []
-values = []
-for line in output.split('\n'):
-    if(line == ""):
-        continue
-    times.append(datetime.datetime.strptime(line.split()[0], "%Y-%m-%d"))
-    values.append(float(line.split()[1].replace(',', '.')))
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(times, values)
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.plot(times, values)
+    daterange = (max(times) - min(times)).days
+    # format the ticks
+    if(daterange < 15 ):
+        ax.xaxis.set_major_locator(days)
+        ax.xaxis.set_major_formatter(daysFmt)
+    if(daterange < 35 ):
+        ax.xaxis.set_major_locator(weeks)
+        ax.xaxis.set_major_formatter(daysFmt)
+    elif(daterange < 90):
+        ax.xaxis.set_major_locator(weeks)
+        ax.xaxis.set_major_formatter(monthsFmt)
+    elif(daterange < 400):
+        ax.xaxis.set_major_locator(months)
+        ax.xaxis.set_major_formatter(monthsFmt)
+    else:
+        ax.xaxis.set_major_locator(years)
+        ax.xaxis.set_major_formatter(yearsFmt)
 
-daterange = (max(times) - min(times)).days
-# format the ticks
-if(daterange < 15 ):
-    ax.xaxis.set_major_locator(days)
-    ax.xaxis.set_major_formatter(daysFmt)
-if(daterange < 35 ):
-    ax.xaxis.set_major_locator(weeks)
-    ax.xaxis.set_major_formatter(daysFmt)
-elif(daterange < 90):
-    ax.xaxis.set_major_locator(weeks)
-    ax.xaxis.set_major_formatter(monthsFmt)
-elif(daterange < 400):
-    ax.xaxis.set_major_locator(months)
-    ax.xaxis.set_major_formatter(monthsFmt)
-else:
-    ax.xaxis.set_major_locator(years)
-    ax.xaxis.set_major_formatter(yearsFmt)
+    ax.yaxis.set_major_formatter(moneyFmt)
 
-ax.yaxis.set_major_formatter(moneyFmt)
-
-daterange = datetime.timedelta(int(round(daterange * .05)))
-datemin = min(times) - daterange
-datemax = max(times) + daterange
-ax.set_xlim(datemin, datemax)
+    daterange = datetime.timedelta(int(round(daterange * .05)))
+    datemin = min(times) - daterange
+    datemax = max(times) + daterange
+    ax.set_xlim(datemin, datemax)
 
 # format the coords message box
-ax.format_xdata = mdates.DateFormatter('%Y-%m-%d')
-ax.format_ydata = price
-ax.grid(True)
+    ax.format_xdata = mdates.DateFormatter('%Y-%m-%d')
+    ax.format_ydata = price
+    ax.grid(True)
 
 # rotates and right aligns the x labels, and moves the bottom of the
 # axes up to make room for them
-fig.autofmt_xdate()
+    fig.autofmt_xdate()
 
-plt.savefig(output_file+".pdf")
+    plt.savefig(output_file+".pdf")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 2:
+        main(sys.argv[1], sys.argv[2:])
+    else:
+        usage()
+        exit()
+
