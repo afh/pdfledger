@@ -18,14 +18,16 @@ commands['retrospective'] = ['--flat', '--no-total', 'balance']
 commands['last12months'] = ['-d', '"d<[today] & d>[today]-365"', '--sort', 'd', '--weekly']
 commands['next12months'] = ['-d', '"d>[today] & d<[today]+365"', '--sort', 'd', '--weekly']
 
+#To be moved to a config later
 exclude = {}
 exclude['acct'] = ['Equity']
-exclude['retrospective'] = ['Expenses:Entertainment']
+exclude['retrospective'] = ['Expenses', 'Cash']
 exclude['forecast'] = ['Equity']
 
 def main():
 
     print header
+    print budget
 
     output = Popen(ledger + commands['accts'], stdout=PIPE).communicate()[0]
     accts = []
@@ -35,7 +37,7 @@ def main():
         accts += line[-1:]
 
     for acct in accts:
-        if(acct in exclude['acct']): continue;
+        if(len([ex for ex in exclude['acct'] if (acct.find(ex) != -1)]) > 0): continue
         print "\chapter{" + acct + "}"
 
         subaccts = []
@@ -44,16 +46,24 @@ def main():
             if(line == ""): continue
             subaccts += line.split(acct)[-1:]
 
-        for subacct in subaccts:
-            #print retrospective of subaccts with at least 7 transactions when viewed weekly over the last 12 months
-            output = Popen(ledger + commands['last12months'] + ['-J', 'register'] + ["^" + acct + subacct], stdout=PIPE).communicate()[0]
-            if(len(output.split('\n')) < 6): continue
-            if(subacct in exclude['retrospective']): continue;
+        #Remove the starting ":" from the subaccount name
+        subaccts = [subacct[1:] for subacct in subaccts]
 
-            print "\section{" + subacct[1:] + " Retrospective}"
-            safename = acct+subacct
+        #Determine which accounts are excluded before iterating
+        excluded = [subacct for ex in exclude['retrospective'] for subacct in subaccts if (str(acct + ":" + subacct).find(ex) != -1)]
+        subaccts = [subacct for subacct in subaccts if (subacct not in excluded)]
+
+        for subacct in subaccts:
+            fullname = acct + ":" + subacct
+            #print retrospective of subaccts with at least 7 transactions when viewed weekly over the last 12 months
+            output = Popen(ledger + commands['last12months'] + ['-J', 'register'] + ["^" + fullname], stdout=PIPE).communicate()[0]
+            if(len(output.split('\n')) < 6): continue
+
+            print "\section{" + subacct + " Retrospective}"
+
+            safename = fullname
             safename = safename.replace(' ', '')
-            plot.main("../build/" + safename, commands['last12months'] + ['-J', 'register'] + ["^" + acct + subacct])
+            plot.main("../build/" + safename, commands['last12months'] + ['-J', 'register'] + ["^" + fullname])
             print "\insertplot{" + safename + "}"
 
         #identify budgeted subaccts
