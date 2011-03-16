@@ -64,12 +64,15 @@ for acct in accts:
         subaccts += line.split(acct)[-1:]
 
     for subacct in subaccts:
-        #print retrospective of all subaccts
+        #print retrospective of subaccts with at least 7 transactions when viewed weekly over the last 12 months
         output = Popen(ledger + commands['last12months'] + ['-J', 'register'] + ["^" + acct + subacct], stdout=PIPE).communicate()[0]
         if(len(output.split('\n')) < 6): continue
+
         print "\section{" + subacct[1:] + " Retrospective}"
-        plot.main("../build/" + acct+subacct, commands['last12months'] + ['-J', 'register'] + ["^" + acct + subacct])
-        print "\insertplot{" + acct + subacct + "}"
+        safename = acct+subacct
+        safename = safename.replace(' ', '')
+        plot.main("../build/" + safename, commands['last12months'] + ['-J', 'register'] + ["^" + acct + subacct])
+        print "\insertplot{" + safename + "}"
 
     #identify budgeted subaccts
 
