@@ -2,7 +2,110 @@
 from subprocess import Popen,PIPE
 import sys
 import plot
-print r"""
+
+
+LEDGER_FILE="/Users/bettse/Dropbox/Finances/201103.lgr"
+if len(sys.argv) > 1:
+    LEDGER_FILE = sys.argv[1]
+
+ledger = ["ledger", '-f', LEDGER_FILE, '-c']
+
+commands = {}
+commands['accts'] = ['--collapse', '--no-total', 'balance']
+commands['acctbudget'] = ['--flat', '--budget', '--no-total', 'balance']
+commands['budget'] = ['--flat', '--no-total', 'budget']
+commands['retrospective'] = ['--flat', '--no-total', 'balance']
+commands['last12months'] = ['-d', '"d<[today] & d>[today]-365"', '--sort', 'd', '--weekly']
+commands['next12months'] = ['-d', '"d>[today] & d<[today]+365"', '--sort', 'd', '--weekly']
+
+exclude = {}
+exclude['acct'] = ['Equity']
+exclude['retrospective'] = ['Expenses:Entertainment']
+exclude['forecast'] = ['Equity']
+
+def main():
+
+    print header
+
+    output = Popen(ledger + commands['accts'], stdout=PIPE).communicate()[0]
+    accts = []
+    for line in output.split('\n'):
+        if(line == ""): continue
+        line = line.split()
+        accts += line[-1:]
+
+    for acct in accts:
+        if(acct in exclude['acct']): continue;
+        print "\chapter{" + acct + "}"
+
+        subaccts = []
+        output = Popen(ledger + commands['retrospective'] + ["^"+acct], stdout=PIPE).communicate()[0]
+        for line in output.split('\n'):
+            if(line == ""): continue
+            subaccts += line.split(acct)[-1:]
+
+        for subacct in subaccts:
+            #print retrospective of subaccts with at least 7 transactions when viewed weekly over the last 12 months
+            output = Popen(ledger + commands['last12months'] + ['-J', 'register'] + ["^" + acct + subacct], stdout=PIPE).communicate()[0]
+            if(len(output.split('\n')) < 6): continue
+            if(subacct in exclude['retrospective']): continue;
+
+            print "\section{" + subacct[1:] + " Retrospective}"
+            safename = acct+subacct
+            safename = safename.replace(' ', '')
+            plot.main("../build/" + safename, commands['last12months'] + ['-J', 'register'] + ["^" + acct + subacct])
+            print "\insertplot{" + safename + "}"
+
+        #identify budgeted subaccts
+
+        #print forecast of budgeted accts
+
+temp = """
+\section{Current month progress}
+
+Negative values indicate to-be-spent funds.  Positive vaues indicate overspending.
+
+\verbatiminput{build/budget.txt}
+
+\chapter{Assets}
+
+\verbatiminput{build/assets.txt}
+
+\chapter{Liabilities}
+
+\verbatiminput{build/liabilities.txt}
+
+\chapter{Transactions}
+
+\section{First Tech Credit Union}
+
+Balance over the last year to date :
+
+\insertplot{checking-1yearbalance}
+
+Balance during \monthname :
+
+\insertplot{checking-1monthbalance}
+
+Transactions for the last 7 days:
+"""
+
+summary = r"""
+\chapter{Summary}
+
+\begin{itemize}
+
+\item The balance of my assets to my liabilities gives my net worth (including retirement funds): \input{build/networth.txt}
+\item Removing long term investment and loan accounts gives my net liquidity: \input{build/liquidity.txt}
+\item Balancing expenses against income yields your cash flow, or net profit/loss(negative is profit, positive is loss): \input{build/cashflow.txt}
+
+\end{itemize}
+"""
+
+print r"""\end{document}"""
+
+
+header = r"""
 \documentclass[pdftex,12pt,letterpaper]{report}
 \usepackage[pdftex]{graphicx}
 \usepackage[us, 12hr]{datetime}
@@ -34,89 +137,27 @@ Let every youth take a leaf out of my book and make it a point to account for ev
 " -- M.K.Gandhi autobiography
 """
 
-LEDGER_FILE="/Users/bettse/Dropbox/Finances/201103.lgr"
-if len(sys.argv) > 1:
-    LEDGER_FILE = sys.argv[1]
+budget = r"""
+\chapter{Budget}
 
-ledger = ["ledger", '-f', LEDGER_FILE, '-c']
+\begin{figure}
+\caption{Breakdown of this months expenses}
 
-commands = {}
-commands['accts'] = ['--collapse', '--no-total', 'balance']
-commands['budget'] = ['--flat', '--budget', '--no-total', 'balance']
-commands['retrospective'] = ['--flat', '--no-total', 'balance']
-commands['last12months'] = ['-d', '"d<[today] & d>[today]-365"', '--sort', 'd', '--weekly']
-commands['next12months'] = ['-d', '"d>[today] & d<[today]+365"', '--sort', 'd', '--weekly']
+\insertplot{monthexpensepie}
 
-output = Popen(ledger + commands['accts'], stdout=PIPE).communicate()[0]
-accts = []
-for line in output.split('\n'):
-    if(line == ""): continue
-    line = line.split()
-    accts += line[-1:]
+\end{figure}
 
-for acct in accts:
-    print "\chapter{" + acct + "}"
-
-    subaccts = []
-    output = Popen(ledger + commands['retrospective'] + ["^"+acct], stdout=PIPE).communicate()[0]
-    for line in output.split('\n'):
-        if(line == ""): continue
-        subaccts += line.split(acct)[-1:]
-
-    for subacct in subaccts:
-        #print retrospective of subaccts with at least 7 transactions when viewed weekly over the last 12 months
-        output = Popen(ledger + commands['last12months'] + ['-J', 'register'] + ["^" + acct + subacct], stdout=PIPE).communicate()[0]
-        if(len(output.split('\n')) < 6): continue
-
-        print "\section{" + subacct[1:] + " Retrospective}"
-        safename = acct+subacct
-        safename = safename.replace(' ', '')
-        plot.main("../build/" + safename, commands['last12months'] + ['-J', 'register'] + ["^" + acct + subacct])
-        print "\insertplot{" + safename + "}"
-
-    #identify budgeted subaccts
-
-    #print forecast of budgeted accts
-
-temp = """
 \section{Current month progress}
 
 Negative values indicate to-be-spent funds.  Positive vaues indicate overspending.
 
-\verbatiminput{build/budget.txt}
-
-\chapter{Assets}
-
-\verbatiminput{build/assets.txt}
-
-\chapter{Liabilities}
-
-\verbatiminput{build/liabilities.txt}
-
-\chapter{Transactions}
-
-\section{First Tech Credit Union}
-
-Balance over the last year to date :
-
-\insertplot{checking-1yearbalance}
-
-Balance during \monthname :
-
-\insertplot{checking-1monthbalance}
-
-Transactions for the last 7 days:
-"""
-print r"""
-\chapter{Summary}
-
-\begin{itemize}
-
-\item The balance of my assets to my liabilities gives my net worth (including retirement funds): \input{build/networth.txt}
-\item Removing long term investment and loan accounts gives my net liquidity: \input{build/liquidity.txt}
-\item Balancing expenses against income yields your cash flow, or net profit/loss(negative is profit, positive is loss): \input{build/cashflow.txt}
-
-\end{itemize}
+\begin{verbatim}
+""" + Popen(ledger + commands['budget'], stdout=PIPE).communicate()[0] + """
+\end{verbatim}
 """
 
-print r"""\end{document}"""
+
+
+if __name__ == "__main__":
+    main()
+
