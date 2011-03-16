@@ -16,7 +16,7 @@ commands['acctbudget'] = ['--flat', '--budget', '--no-total', 'balance']
 commands['budget'] = ['--flat', '--no-total', 'budget']
 commands['retrospective'] = ['--flat', '--no-total', 'balance']
 commands['last12months'] = ['-d', '"d<[today] & d>[today]-365"', '--sort', 'd', '--weekly']
-commands['next12months'] = ['-d', '"d>[today] & d<[today]+365"', '--sort', 'd', '--weekly']
+commands['next12months'] = ['--forecast', '"d>[today] & d<[today]+365"', '-d', '"d>[today] & d<[today]+365"', '--sort', 'd', '--weekly']
 commands['networth'] = ['--collapse', 'bal', '^Assets', '^Liabilities']
 commands['liquidity'] = ['--collapse', 'bal', '^Assets', '^Liabilities', 'and not roth']
 commands['cashflow'] = ['--collapse', 'bal', '^Expenses', '^Income']
@@ -28,6 +28,7 @@ exclude['retrospective'] = ['Expenses', 'Cash']
 exclude['forecast'] = ['Equity', 'Salary']
 
 def runledger(cmd):
+    #print cmd
     return Popen(ledger + cmd, stdout=PIPE).communicate()[0]
 
 
@@ -72,8 +73,8 @@ def main():
 
             safename = fullname
             safename = safename.replace(' ', '')
-            plot.main("../build/" + safename, commands['last12months'] + ['-J', 'register'] + ["^" + fullname])
-            print "\insertplot{" + safename + "}"
+            plot.main("../build/" + safename + "retro", commands['last12months'] + ['-J', 'register'] + ["^" + fullname])
+            print "\insertplot{" + safename + "retro}"
 
         #identify budgeted subaccts
         subaccts = []
@@ -96,8 +97,8 @@ def main():
 
             safename = fullname
             safename = safename.replace(' ', '')
-            plot.main("../build/" + safename, commands['next12months'] + ['-J', 'register'] + ["^" + fullname])
-            print "\insertplot{" + safename + "}"
+            plot.main("../build/" + safename + "forecast", commands['next12months'] + ['-J', 'register'] + ["^" + fullname])
+            print "\insertplot{" + safename + "forecast}"
 
     print summary
 
