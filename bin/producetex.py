@@ -17,11 +17,11 @@ commands['budget'] = ['--flat', '--no-total', 'budget']
 commands['retrospective'] = ['--flat', '--no-total', 'balance']
 commands['last12months'] = ['-d', '"d<[today] & d>[today]-365"', '--sort', 'd', '--weekly']
 commands['next12months'] = ['--forecast', '"d>[today] & d<[today]+365"', '-d', '"d>[today] & d<[today]+365"', '--sort', 'd', '--weekly']
+
+#To be moved to a config later
 commands['networth'] = ['--collapse', 'bal', '^Assets', '^Liabilities']
 commands['liquidity'] = ['--collapse', 'bal', '^Assets', '^Liabilities', 'and not roth']
 commands['cashflow'] = ['--collapse', 'bal', '^Expenses', '^Income']
-
-#To be moved to a config later
 exclude = {}
 exclude['acct'] = ['Equity']
 exclude['retrospective'] = ['Expenses', 'Cash']
@@ -31,12 +31,66 @@ def runledger(cmd):
     #print cmd
     return Popen(ledger + cmd, stdout=PIPE).communicate()[0]
 
+def retrospective(acct):
+    subaccts = []
+    output = runledger(commands['retrospective'] + ["^"+acct])
+    for line in output.split('\n'):
+        if(line == ""): continue
+        subaccts += line.split(acct)[-1:]
+
+    #Remove the starting ":" from the subaccount name
+    subaccts = [subacct[1:] for subacct in subaccts]
+
+    #Determine which accounts are excluded before iterating
+    excluded = [subacct for ex in exclude['retrospective'] for subacct in subaccts if (str(acct + ":" + subacct).find(ex) != -1)]
+    subaccts = [subacct for subacct in subaccts if (subacct not in excluded)]
+
+    for subacct in subaccts:
+        fullname = acct + ":" + subacct
+        #print retrospective of subaccts with at least 7 transactions when viewed weekly over the last 12 months
+        output = runledger(commands['last12months'] + ['-J', 'register'] + ["^" + fullname])
+        if(len(output.split('\n')) < 6): continue
+
+        print "\section{" + subacct + " Retrospective}"
+
+        safename = fullname
+        safename = safename.replace(' ', '')
+        plot.main("./build/" + safename + "retro", commands['last12months'] + ['-J', 'register'] + ["^" + fullname])
+        print "\insertplot{" + safename + "retro}"
+
+
+def forecast(acct):
+    #identify budgeted subaccts
+    subaccts = []
+    output = runledger(commands['acctbudget'] + ["^"+acct])
+    for line in output.split('\n'):
+        if(line == ""): continue
+        subaccts += line.split(acct)[-1:]
+
+    #Remove the starting ":" from the subaccount name
+    subaccts = [subacct[1:] for subacct in subaccts]
+
+    #Determine which accounts are excluded before iterating
+    excluded = [subacct for ex in exclude['forecast'] for subacct in subaccts if (str(acct + ":" + subacct).find(ex) != -1)]
+    subaccts = [subacct for subacct in subaccts if (subacct not in excluded)]
+
+    for subacct in subaccts:
+        fullname = acct + ":" + subacct
+        #print forecast of budgeted accts
+        print "\section{" + subacct + " Forecast}"
+
+        safename = fullname
+        safename = safename.replace(' ', '')
+        plot.main("./build/" + safename + "forecast", commands['next12months'] + ['-J', 'register'] + ["^" + fullname])
+        print "\insertplot{" + safename + "forecast}"
+
+
 
 def main():
 
     print header
 
-    pie.main("../build/", ['-f', LEDGER_FILE, 'balance', 'Expenses'])
+    pie.main("./build/", ['-f', LEDGER_FILE, 'balance', 'Expenses'])
     print budget
 
     output = runledger(commands['accts'])
@@ -50,55 +104,8 @@ def main():
         if(len([ex for ex in exclude['acct'] if (acct.find(ex) != -1)]) > 0): continue
         print "\chapter{" + acct + "}"
 
-        subaccts = []
-        output = runledger(commands['retrospective'] + ["^"+acct])
-        for line in output.split('\n'):
-            if(line == ""): continue
-            subaccts += line.split(acct)[-1:]
-
-        #Remove the starting ":" from the subaccount name
-        subaccts = [subacct[1:] for subacct in subaccts]
-
-        #Determine which accounts are excluded before iterating
-        excluded = [subacct for ex in exclude['retrospective'] for subacct in subaccts if (str(acct + ":" + subacct).find(ex) != -1)]
-        subaccts = [subacct for subacct in subaccts if (subacct not in excluded)]
-
-        for subacct in subaccts:
-            fullname = acct + ":" + subacct
-            #print retrospective of subaccts with at least 7 transactions when viewed weekly over the last 12 months
-            output = runledger(commands['last12months'] + ['-J', 'register'] + ["^" + fullname])
-            if(len(output.split('\n')) < 6): continue
-
-            print "\section{" + subacct + " Retrospective}"
-
-            safename = fullname
-            safename = safename.replace(' ', '')
-            plot.main("../build/" + safename + "retro", commands['last12months'] + ['-J', 'register'] + ["^" + fullname])
-            print "\insertplot{" + safename + "retro}"
-
-        #identify budgeted subaccts
-        subaccts = []
-        output = runledger(commands['acctbudget'] + ["^"+acct])
-        for line in output.split('\n'):
-            if(line == ""): continue
-            subaccts += line.split(acct)[-1:]
-
-        #Remove the starting ":" from the subaccount name
-        subaccts = [subacct[1:] for subacct in subaccts]
-
-        #Determine which accounts are excluded before iterating
-        excluded = [subacct for ex in exclude['forecast'] for subacct in subaccts if (str(acct + ":" + subacct).find(ex) != -1)]
-        subaccts = [subacct for subacct in subaccts if (subacct not in excluded)]
-
-        for subacct in subaccts:
-            fullname = acct + ":" + subacct
-            #print forecast of budgeted accts
-            print "\section{" + subacct + " Forecast}"
-
-            safename = fullname
-            safename = safename.replace(' ', '')
-            plot.main("../build/" + safename + "forecast", commands['next12months'] + ['-J', 'register'] + ["^" + fullname])
-            print "\insertplot{" + safename + "forecast}"
+        retrospective(acct)
+        forecast(acct)
 
     print summary
 
