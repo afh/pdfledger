@@ -25,7 +25,7 @@ from subprocess import Popen,PIPE
 import sys
 import locale
 
-locale.setlocale( locale.LC_ALL, '' )
+locale.setlocale(locale.LC_ALL, '' )
 
 def price(x, pos):
     return unicode(locale.currency(x, grouping=True), 'utf-8')

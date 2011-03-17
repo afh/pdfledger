@@ -4,6 +4,7 @@ import sys
 import plot
 import pie
 import ConfigParser
+import getpass
 
 config = ConfigParser.RawConfigParser()
 config.read('./examples/pdfledger.cfg')
@@ -12,8 +13,9 @@ user = ""
 if len(sys.argv) > 1:
     user = sys.argv[1]
 else:
-    print "You must specify a user"
-    exit()
+    user = getpass.getuser().strip()
+    #print "No user provided, using ", user
+
 commands = {}
 commands['accts'] = ['--collapse', '--no-total', 'balance']
 commands['acctbudget'] = ['--flat', '--budget', '--no-total', 'balance']
