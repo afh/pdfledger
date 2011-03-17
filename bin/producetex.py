@@ -19,8 +19,8 @@ commands['accts'] = ['--collapse', '--no-total', 'balance']
 commands['acctbudget'] = ['--flat', '--budget', '--no-total', 'balance']
 commands['budget'] = ['--flat', '--no-total', 'budget']
 commands['retrospective'] = ['--flat', '--no-total', 'balance']
-commands['last12months'] = ['-d', '"d<[today] & d>[today]-365"', '--sort', 'd', '--weekly']
-commands['next12months'] = ['--forecast', '"d>[today] & d<[today]+365"', '-d', '"d>[today] & d<[today]+365"', '--sort', 'd', '--weekly']
+commands['last12months'] = ['-E', '-d', 'd<[today] & d>[today]-365', '--sort', 'd', '--weekly']
+commands['next12months'] = ['-E', '--forecast', 'd>[today] & d<[today]+365', '-d', 'd>[today] & d<[today]+365', '--sort', 'd', '--weekly']
 
 
 LEDGER_FILE = config.get(user, 'ledger_file')
@@ -33,6 +33,7 @@ commands['liquidity'] = config.get(user, 'liquidity').split(',')
 commands['cashflow'] = config.get(user, 'cashflow').split(',')
 
 def runledger(cmd):
+    #print cmd
     ledger = ["ledger", '-f', LEDGER_FILE, '-c']
     return Popen(ledger + cmd, stdout=PIPE).communicate()[0]
 
