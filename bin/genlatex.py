@@ -34,10 +34,22 @@ commands['networth'] = config.get(user, 'networth').split(',')
 commands['liquidity'] = config.get(user, 'liquidity').split(',')
 commands['cashflow'] = config.get(user, 'cashflow').split(',')
 
+
+def tail(input):
+    if(input[-1] == '\n'):
+        input = input[:-1]
+    input = input.split("\n")
+    return str(' '.join(input[-1:])).strip()
+
+
 def runledger(cmd):
     #print cmd
     ledger = ["ledger", '-f', LEDGER_FILE, '-c']
-    return Popen(ledger + cmd, stdout=PIPE).communicate()[0]
+    output = Popen(ledger + cmd, stdout=PIPE).communicate()[0]
+    if(output[-1] == '\n'):
+        return output[:-1]
+    else:
+        return output
 
 def retrospective(acct):
     rtnstring = ""
@@ -128,15 +140,16 @@ def main():
     f.write(latex)
     f.close()
 
+    print latex
 
 summary = r"""
 \chapter{Summary}
 
 \begin{itemize}
 
-\item The balance of my assets to my liabilities gives my net worth (including retirement funds): """ + runledger(commands['networth']).replace("Assets", "").strip() + """
-\item Removing long term investment and loan accounts gives my net liquidity: """ + runledger(commands['liquidity']).replace("Assets", "").strip() + """
-\item Balancing expenses against income yields your cash flow, or net profit/loss(negative is profit, positive is loss): """ + runledger(commands['cashflow']).replace("Assets", "").strip() + """
+\item The balance of my assets to my liabilities gives my net worth (including retirement funds): """ + tail(runledger(commands['networth'])).replace("Assets", "") + """
+\item Removing long term investment and loan accounts gives my net liquidity: """ + tail(runledger(commands['liquidity'])).replace("Assets", "") + """
+\item Balancing expenses against income yields your cash flow, or net profit/loss(negative is profit, positive is loss): """ + tail(runledger(commands['cashflow'])) + """
 
 \end{itemize}
 """
