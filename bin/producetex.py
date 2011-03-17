@@ -51,13 +51,14 @@ def retrospective(acct):
     excluded = [subacct for ex in exclude['retrospective'] for subacct in subaccts if (str(acct + ":" + subacct).find(ex) != -1)]
     subaccts = [subacct for subacct in subaccts if (subacct not in excluded)]
 
+    print "\section{Retrospectives}"
     for subacct in subaccts:
         fullname = acct + ":" + subacct
         #print retrospective of subaccts with at least 7 transactions when viewed weekly over the last 12 months
         output = runledger(commands['last12months'] + ['-J', 'register'] + ["^" + fullname])
         if(len(output.split('\n')) < 6): continue
 
-        print "\section{" + subacct + " Retrospective}"
+        print "\subsection{" + subacct + " Retrospective}"
 
         safename = fullname
         safename = safename.replace(' ', '')
@@ -80,10 +81,11 @@ def forecast(acct):
     excluded = [subacct for ex in exclude['forecast'] for subacct in subaccts if (str(acct + ":" + subacct).find(ex) != -1)]
     subaccts = [subacct for subacct in subaccts if (subacct not in excluded)]
 
+    print "\section{Forecasts}"
     for subacct in subaccts:
         fullname = acct + ":" + subacct
         #print forecast of budgeted accts
-        print "\section{" + subacct + " Forecast}"
+        print "\subsection{" + subacct + " Forecast}"
 
         safename = fullname
         safename = safename.replace(' ', '')
