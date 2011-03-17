@@ -28,8 +28,6 @@ import locale
 locale.setlocale( locale.LC_ALL, '' )
 
 def price(x, pos):
-    print x
-    print locale.currency(x, grouping=True)
     return unicode(locale.currency(x, grouping=True), 'utf-8')
 def usage():
     print "Usage: " + sys.argv[0] + " <imagename> <paramters1> <parameter2> ..."
