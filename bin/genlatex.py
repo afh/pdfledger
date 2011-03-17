@@ -14,7 +14,7 @@ if len(sys.argv) > 1:
     user = sys.argv[1]
 else:
     user = getpass.getuser().strip()
-    #print "No user provided, using ", user
+    print "No user provided, using ", user
 
 commands = {}
 commands['accts'] = ['--collapse', '--no-total', 'balance']
@@ -33,7 +33,8 @@ exclude['forecast'] = config.get(user, 'exclude_forecast').split(',')
 commands['networth'] = config.get(user, 'networth').split(',')
 commands['liquidity'] = config.get(user, 'liquidity').split(',')
 commands['cashflow'] = config.get(user, 'cashflow').split(',')
-
+print "Exclude: ", exclude
+print "Commands: ", commands
 
 def tail(input):
     if(input[-1] == '\n'):
@@ -43,7 +44,7 @@ def tail(input):
 
 
 def runledger(cmd):
-    #print cmd
+    print cmd
     ledger = ["ledger", '-f', LEDGER_FILE, '-c']
     output = Popen(ledger + cmd, stdout=PIPE).communicate()[0]
     if(output[-1] == '\n'):
@@ -56,7 +57,6 @@ def retrospective(acct):
     subaccts = []
     output = runledger(commands['retrospective'] + ["^"+acct])
     for line in output.split('\n'):
-        if(line == ""): continue
         subaccts += line.split(acct)[-1:]
 
     #Remove the starting ":" from the subaccount name
@@ -116,12 +116,12 @@ def main():
     latex += header
 
     pie.main("./build/", ['-f', LEDGER_FILE, 'balance', 'Expenses'])
-    latex += budget
+    if(config.getboolean(user, 'budget')):
+        latex += budget
 
     output = runledger(commands['accts'])
     accts = []
     for line in output.split('\n'):
-        if(line == ""): continue
         line = line.split()
         accts += line[-1:]
 
@@ -130,7 +130,9 @@ def main():
         latex += "\chapter{" + acct + "}"
 
         latex += retrospective(acct)
-        latex += forecast(acct)
+
+        if(config.getboolean(user, 'budget')):
+            latex += forecast(acct)
 
     latex += summary
 
@@ -140,7 +142,7 @@ def main():
     f.write(latex)
     f.close()
 
-    print latex
+    #print latex
 
 summary = r"""
 \chapter{Summary}
