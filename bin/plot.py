@@ -23,9 +23,14 @@ import matplotlib.cbook as cbook
 import matplotlib.ticker as ticker
 from subprocess import Popen,PIPE
 import sys
+import locale
 
-currency='€'
-def price(x): return '%s%1.2f'%(x,currency)
+locale.setlocale( locale.LC_ALL, '' )
+
+def price(x, pos):
+    print x
+    print locale.currency(x, grouping=True)
+    return unicode(locale.currency(x, grouping=True), 'utf-8')
 def usage():
     print "Usage: " + sys.argv[0] + " <imagename> <paramters1> <parameter2> ..."
 
@@ -36,7 +41,8 @@ weeks    = mdates.WeekdayLocator(byweekday=mdates.MO, interval=1)
 yearsFmt = mdates.DateFormatter('%Y')
 monthsFmt = mdates.DateFormatter('%m/%Y')
 daysFmt = mdates.DateFormatter('%m/%d')
-moneyFmt = ticker.FormatStrFormatter(unicode('%s%%1.2f'%currency, 'utf-8'))
+#moneyFmt = ticker.FormatStrFormatter(unicode('%s%%1.2f'%currency, 'utf-8'))
+moneyFmt = ticker.FuncFormatter(price)
 
 def main(output_file, parameters):
     output = Popen(["ledger"] + parameters, stdout=PIPE).communicate()[0]
@@ -77,7 +83,7 @@ def main(output_file, parameters):
     datemax = max(times) + daterange
     ax.set_xlim(datemin, datemax)
 
-# format the coords message box
+    # format the coords message box
     ax.format_xdata = mdates.DateFormatter('%Y-%m-%d')
     ax.format_ydata = price
     ax.grid(True)
