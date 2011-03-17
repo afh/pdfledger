@@ -14,11 +14,11 @@ if len(sys.argv) > 1:
     user = sys.argv[1]
 else:
     user = getpass.getuser().strip()
-    print "No user provided, using ", user
+    #print "No user provided, using ", user
 
 commands = {}
 commands['accts'] = ['--collapse', '--no-total', 'balance']
-commands['acctbudget'] = ['--flat', '--budget', '--no-total', 'balance']
+commands['acctbudget'] = ['-E', '--flat', '--budget', '--no-total', 'balance']
 commands['budget'] = ['--flat', '--no-total', 'budget']
 commands['retrospective'] = ['--flat', '--no-total', 'balance']
 commands['last12months'] = ['-E', '-d', 'd<[today] & d>[today]-365', '--sort', 'd', '--weekly']
@@ -33,8 +33,8 @@ exclude['forecast'] = config.get(user, 'exclude_forecast').split(',')
 commands['networth'] = config.get(user, 'networth').split(',')
 commands['liquidity'] = config.get(user, 'liquidity').split(',')
 commands['cashflow'] = config.get(user, 'cashflow').split(',')
-print "Exclude: ", exclude
-print "Commands: ", commands
+#print "Exclude: ", exclude
+#print "Commands: ", commands
 
 def tail(input):
     if(input[-1] == '\n'):
@@ -44,7 +44,7 @@ def tail(input):
 
 
 def runledger(cmd):
-    print cmd
+    #print cmd
     ledger = ["ledger", '-f', LEDGER_FILE, '-c']
     output = Popen(ledger + cmd, stdout=PIPE).communicate()[0]
     if(output[-1] == '\n'):
@@ -66,7 +66,8 @@ def retrospective(acct):
     excluded = [subacct for ex in exclude['retrospective'] for subacct in subaccts if (str(acct + ":" + subacct).find(ex) != -1)]
     subaccts = [subacct for subacct in subaccts if (subacct not in excluded)]
 
-    rtnstring += "\section{Retrospectives}"
+    if(len(subaccts) > 0):
+        rtnstring += "\section{Retrospectives}"
     for subacct in subaccts:
         fullname = acct + ":" + subacct
         #print retrospective of subaccts with at least 7 transactions when viewed weekly over the last 12 months
@@ -87,9 +88,7 @@ def forecast(acct):
     subaccts = []
     output = runledger(commands['acctbudget'] + ["^"+acct])
     for line in output.split('\n'):
-        if(line == ""): continue
         subaccts += line.split(acct)[-1:]
-
     #Remove the starting ":" from the subaccount name
     subaccts = [subacct[1:] for subacct in subaccts]
 
@@ -97,7 +96,8 @@ def forecast(acct):
     excluded = [subacct for ex in exclude['forecast'] for subacct in subaccts if (str(acct + ":" + subacct).find(ex) != -1)]
     subaccts = [subacct for subacct in subaccts if (subacct not in excluded)]
 
-    rtnstring += "\section{Forecasts}"
+    if(len(subaccts) > 0):
+        rtnstring += "\section{Forecasts}"
     for subacct in subaccts:
         fullname = acct + ":" + subacct
         #print forecast of budgeted accts
