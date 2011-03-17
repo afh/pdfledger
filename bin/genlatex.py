@@ -40,6 +40,7 @@ def runledger(cmd):
     return Popen(ledger + cmd, stdout=PIPE).communicate()[0]
 
 def retrospective(acct):
+    rtnstring = ""
     subaccts = []
     output = runledger(commands['retrospective'] + ["^"+acct])
     for line in output.split('\n'):
@@ -53,22 +54,23 @@ def retrospective(acct):
     excluded = [subacct for ex in exclude['retrospective'] for subacct in subaccts if (str(acct + ":" + subacct).find(ex) != -1)]
     subaccts = [subacct for subacct in subaccts if (subacct not in excluded)]
 
-    print "\section{Retrospectives}"
+    rtnstring += "\section{Retrospectives}"
     for subacct in subaccts:
         fullname = acct + ":" + subacct
         #print retrospective of subaccts with at least 7 transactions when viewed weekly over the last 12 months
         output = runledger(commands['last12months'] + ['-J', 'register'] + ["^" + fullname])
         if(len(output.split('\n')) < 6): continue
 
-        print "\subsection{" + subacct + " Retrospective}"
+        rtnstring += "\subsection{" + subacct + " Retrospective}"
 
         safename = fullname
         safename = safename.replace(' ', '')
         plot.main("./build/" + safename + "retro", commands['last12months'] + ['-J', 'register'] + ["^" + fullname])
-        print "\insertplot{" + safename + "retro}"
-
+        rtnstring += "\insertplot{" + safename + "retro}"
+    return rtnstring
 
 def forecast(acct):
+    rtnstring = ""
     #identify budgeted subaccts
     subaccts = []
     output = runledger(commands['acctbudget'] + ["^"+acct])
@@ -83,24 +85,26 @@ def forecast(acct):
     excluded = [subacct for ex in exclude['forecast'] for subacct in subaccts if (str(acct + ":" + subacct).find(ex) != -1)]
     subaccts = [subacct for subacct in subaccts if (subacct not in excluded)]
 
-    print "\section{Forecasts}"
+    rtnstring += "\section{Forecasts}"
     for subacct in subaccts:
         fullname = acct + ":" + subacct
         #print forecast of budgeted accts
-        print "\subsection{" + subacct + " Forecast}"
+        rtnstring += "\subsection{" + subacct + " Forecast}"
 
         safename = fullname
         safename = safename.replace(' ', '')
         plot.main("./build/" + safename + "forecast", commands['next12months'] + ['-J', 'register'] + ["^" + fullname])
-        print "\insertplot{" + safename + "forecast}"
+        rtnstring += "\insertplot{" + safename + "forecast}"
 
+    return rtnstring
 
 
 def main():
-    print header
+    latex = ""
+    latex += header
 
     pie.main("./build/", ['-f', LEDGER_FILE, 'balance', 'Expenses'])
-    print budget
+    latex += budget
 
     output = runledger(commands['accts'])
     accts = []
@@ -111,15 +115,18 @@ def main():
 
     for acct in accts:
         if(len([ex for ex in exclude['acct'] if (acct.find(ex) != -1)]) > 0): continue
-        print "\chapter{" + acct + "}"
+        latex += "\chapter{" + acct + "}"
 
-        retrospective(acct)
-        forecast(acct)
+        latex += retrospective(acct)
+        latex += forecast(acct)
 
-    print summary
+    latex += summary
 
-    print r"""\end{document}"""
+    latex += r"""\end{document}"""
 
+    f = open("build/pdfledger.tex", 'w')
+    f.write(latex)
+    f.close()
 
 
 summary = r"""

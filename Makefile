@@ -4,7 +4,7 @@ CABINET="/Users/bettse/Dropbox/Virtual Filing Cabinet/"
 
 USER=$(shell whoami)
 ifeq '$(USER)' 'bettse'
-LEDGER="templates/bettse/pdfledger.tex"
+LEDGER="build/pdfledger.tex"
 LATEX="pdflatex"
 endif
 
