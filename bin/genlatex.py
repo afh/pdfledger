@@ -135,8 +135,8 @@ summary = r"""
 \begin{itemize}
 
 \item The balance of my assets to my liabilities gives my net worth (including retirement funds): """ + runledger(commands['networth']).replace("Assets", "").strip() + """
-\item Removing long term investment and loan accounts gives my net liquidity: """ + runledger(commands['networth']).replace("Assets", "").strip() + """
-\item Balancing expenses against income yields your cash flow, or net profit/loss(negative is profit, positive is loss): """ + runledger(commands['networth']).replace("Assets", "").strip() + """
+\item Removing long term investment and loan accounts gives my net liquidity: """ + runledger(commands['liquidity']).replace("Assets", "").strip() + """
+\item Balancing expenses against income yields your cash flow, or net profit/loss(negative is profit, positive is loss): """ + runledger(commands['cashflow']).replace("Assets", "").strip() + """
 
 \end{itemize}
 """
