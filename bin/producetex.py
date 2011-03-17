@@ -3,13 +3,17 @@ from subprocess import Popen,PIPE
 import sys
 import plot
 import pie
+import ConfigParser
 
-LEDGER_FILE="/Users/bettse/Dropbox/Finances/201103.lgr"
+config = ConfigParser.RawConfigParser()
+config.read('./examples/pdfledger.cfg')
+
+user = ""
 if len(sys.argv) > 1:
-    LEDGER_FILE = sys.argv[1]
-
-ledger = ["ledger", '-f', LEDGER_FILE, '-c']
-
+    user = sys.argv[1]
+else:
+    print "You must specify a user"
+    exit()
 commands = {}
 commands['accts'] = ['--collapse', '--no-total', 'balance']
 commands['acctbudget'] = ['--flat', '--budget', '--no-total', 'balance']
@@ -18,17 +22,18 @@ commands['retrospective'] = ['--flat', '--no-total', 'balance']
 commands['last12months'] = ['-d', '"d<[today] & d>[today]-365"', '--sort', 'd', '--weekly']
 commands['next12months'] = ['--forecast', '"d>[today] & d<[today]+365"', '-d', '"d>[today] & d<[today]+365"', '--sort', 'd', '--weekly']
 
-#To be moved to a config later
-commands['networth'] = ['--collapse', 'bal', '^Assets', '^Liabilities']
-commands['liquidity'] = ['--collapse', 'bal', '^Assets', '^Liabilities', 'and not roth']
-commands['cashflow'] = ['--collapse', 'bal', '^Expenses', '^Income']
+
+LEDGER_FILE = config.get(user, 'ledger_file')
 exclude = {}
-exclude['acct'] = ['Equity']
-exclude['retrospective'] = ['Expenses', 'Cash']
-exclude['forecast'] = ['Equity', 'Salary']
+exclude['acct'] = config.get(user, 'exclude_acct').split(',')
+exclude['retrospective'] = config.get(user, 'exclude_retrospective').split(',')
+exclude['forecast'] = config.get(user, 'exclude_forecast').split(',')
+commands['networth'] = config.get(user, 'networth').split(',')
+commands['liquidity'] = config.get(user, 'liquidity').split(',')
+commands['cashflow'] = config.get(user, 'cashflow').split(',')
 
 def runledger(cmd):
-    #print cmd
+    ledger = ["ledger", '-f', LEDGER_FILE, '-c']
     return Popen(ledger + cmd, stdout=PIPE).communicate()[0]
 
 def retrospective(acct):
@@ -87,7 +92,6 @@ def forecast(acct):
 
 
 def main():
-
     print header
 
     pie.main("./build/", ['-f', LEDGER_FILE, 'balance', 'Expenses'])
@@ -136,16 +140,12 @@ header = r"""
 \usepackage[colorlinks=true]{hyperref}
 \let\verbatiminput=\verbatimtabinput %tabs are ignored in verbatim, this corrects for that
 \def\verbatimtabsize{4\relax} % set tabs=4 (else my output goes off the screen)
-
-
 \usepackage{fullpage}
-
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 \newcommand{\insertplot}[1]{\includegraphics[width=0.9\linewidth, keepaspectratio=true]{build/#1}\\[1cm]}
 
 \begin{document}
-
 \input{templates/bettse/title.tex}
 
 \tableofcontents
