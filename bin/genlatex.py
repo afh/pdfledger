@@ -19,7 +19,7 @@ else:
 commands = {}
 commands['accts'] = ['--collapse', '--no-total', 'balance']
 commands['acctbudget'] = ['-E', '--flat', '--budget', '--no-total', 'balance']
-commands['budget'] = ['--flat', '--no-total', 'budget']
+commands['budget'] = ['--flat', '--no-total', '-p', 'this month', 'budget']
 commands['retrospective'] = ['--flat', '--no-total', 'balance']
 commands['last12months'] = ['-E', '-d', 'd<[today] & d>[today]-365', '--sort', 'd', '--weekly']
 commands['next12months'] = ['-E', '--forecast', 'd>[today] & d<[today]+365', '-d', 'd>[today] & d<[today]+365', '--sort', 'd', '--weekly']
@@ -198,7 +198,7 @@ budget = r"""
 
 \section{Current month progress}
 
-Negative values indicate to-be-spent funds.  Positive vaues indicate overspending.
+Percentages are progress towards the budgeted amount.
 
 \begin{verbatim}
 """ + runledger(commands['budget']) + """
