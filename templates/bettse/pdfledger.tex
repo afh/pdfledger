@@ -1,4 +1,3 @@
-
 \documentclass[pdftex,12pt,letterpaper]{report}
 \usepackage[pdftex]{graphicx}
 \usepackage[us, 12hr]{datetime}
@@ -7,12 +6,18 @@
 \usepackage[colorlinks=true]{hyperref}
 \let\verbatiminput=\verbatimtabinput %tabs are ignored in verbatim, this corrects for that
 \def\verbatimtabsize{4\relax} % set tabs=4 (else my output goes off the screen)
+
+\write18{bash bin/producedata.sh examples/bettse.conf /Users/bettse/Dropbox/Finances/current.lgr}
+%\write18{python degree_tree.py} %run to produce example graph file
+
 \usepackage{fullpage}
+
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 \newcommand{\insertplot}[1]{\includegraphics[width=0.9\linewidth, keepaspectratio=true]{build/#1}\\[1cm]}
 
 \begin{document}
+
 \input{templates/bettse/title.tex}
 
 \tableofcontents
@@ -25,85 +30,61 @@ That habit has stayed with me ever since, and I know that as a result, though I 
 Let every youth take a leaf out of my book and make it a point to account for everything that comes into and goes out of his pocket, and like me he is sure to be a gainer in the end.
 " -- M.K.Gandhi autobiography
 
-
 \chapter{Budget}
 
 \begin{figure}
 \caption{Breakdown of this months expenses}
-
 \insertplot{monthexpensepie}
-
 \end{figure}
+
+\verbatiminput{/Users/bettse/Dropbox/Finances/budget.lgr}
 
 \section{Current month progress}
 
 Negative values indicate to-be-spent funds.  Positive vaues indicate overspending.
 
-\begin{verbatim}
- 2747.73 USD  9649.65 USD -6901.92 USD   28%  Assets:Bank:FirstTech:Checking
-  850.00 USD   750.00 USD   100.00 USD  113%  Assets:Investment:AmericanFunds:CAPITAL WORLD BOND FUND
-  850.00 USD   750.00 USD   100.00 USD  113%  Assets:Investment:AmericanFunds:CAPITAL WORLD GROWTH AND INCOME FUND
-  590.00 USD  3000.00 USD -2410.00 USD   20%  Assets:Investment:AmericanFunds:Money Market
- 1500.00 USD  1500.00 USD            0  100%  Assets:Investment:AmericanFunds:Roth IRA:NEW WORLD FUND
- 1500.00 USD  1500.00 USD            0  100%  Assets:Investment:AmericanFunds:Roth IRA:THE GROWTH FUND OF AMERICA
-  918.11 USD   876.90 USD    41.21 USD  105%  Expenses:Bills:ATT
-  208.50 USD   247.50 USD   -39.00 USD   84%  Expenses:Bills:Colo
- 2061.88 USD  1800.00 USD   261.88 USD  115%  Expenses:Bills:Electric
-  739.00 USD   749.85 USD   -10.85 USD   99%  Expenses:Bills:Fios
- 2465.00 USD  2550.00 USD   -85.00 USD   97%  Expenses:Bills:Housecleaning
-12232.00 USD 13245.00 USD -1013.00 USD   92%  Expenses:Bills:Rent
-  224.25 USD   224.25 USD            0  100%  Expenses:Bills:Usenet
-  997.49 USD  1500.00 USD  -502.51 USD   66%  Expenses:Entertainment
- 2481.97 USD  2250.00 USD   231.97 USD  110%  Expenses:Food:Dining out
- 4476.84 USD  4500.00 USD   -23.16 USD   99%  Expenses:Food:Groceries
-  855.15 USD   900.00 USD   -44.85 USD   95%  Expenses:Food:Starbucks
- 3590.34 USD  3750.00 USD  -159.66 USD   96%  Expenses:Household
--49221.37 USD -49743.15 USD   521.78 USD   99%  Income:Salary
-
-\end{verbatim}
+\verbatiminput{build/budget.txt}
 
 \chapter{Assets}
-\section{Retrospectives}
-\subsection{Bank:FirstTech:Checking Retrospective}
-\insertplot{Assets:Bank:FirstTech:Checkingretro}
-\subsection{Bank:FirstTech:Savings Retrospective}
-\insertplot{Assets:Bank:FirstTech:Savingsretro}
-\subsection{Bank:OSUFed:Savings Retrospective}
-\insertplot{Assets:Bank:OSUFed:Savingsretro}
-\subsection{Investment:AmericanFunds:CAPITAL WORLD BOND FUND Retrospective}
-\insertplot{Assets:Investment:AmericanFunds:CAPITALWORLDBONDFUNDretro}
-\subsection{Investment:AmericanFunds:CAPITAL WORLD GROWTH AND INCOME FUND Retrospective}
-\insertplot{Assets:Investment:AmericanFunds:CAPITALWORLDGROWTHANDINCOMEFUNDretro}
-\subsection{Investment:AmericanFunds:Money Market Retrospective}
-\insertplot{Assets:Investment:AmericanFunds:MoneyMarketretro}
-\subsection{Investment:AmericanFunds:Roth IRA:NEW WORLD FUND Retrospective}
-\insertplot{Assets:Investment:AmericanFunds:RothIRA:NEWWORLDFUNDretro}
-\subsection{Investment:AmericanFunds:Roth IRA:THE GROWTH FUND OF AMERICA Retrospective}
-\insertplot{Assets:Investment:AmericanFunds:RothIRA:THEGROWTHFUNDOFAMERICAretro}
-\section{Forecasts}
-\subsection{Bank:FirstTech:Checking Forecast}
-\insertplot{Assets:Bank:FirstTech:Checkingforecast}
-\subsection{Investment:AmericanFunds:CAPITAL WORLD BOND FUND Forecast}
-\insertplot{Assets:Investment:AmericanFunds:CAPITALWORLDBONDFUNDforecast}
-\subsection{Investment:AmericanFunds:CAPITAL WORLD GROWTH AND INCOME FUND Forecast}
-\insertplot{Assets:Investment:AmericanFunds:CAPITALWORLDGROWTHANDINCOMEFUNDforecast}
-\subsection{Investment:AmericanFunds:Money Market Forecast}
-\insertplot{Assets:Investment:AmericanFunds:MoneyMarketforecast}
-\chapter{Expenses}
-\section{Retrospectives}
-\section{Forecasts}
-\chapter{Income}
-\section{Retrospectives}
-\section{Forecasts}
 
-\chapter{Summary}
+\verbatiminput{build/assets.txt}
+
+\chapter{Liabilities}
+
+\verbatiminput{build/liabilities.txt}
+
+\chapter{Transactions}
+
+\section{First Tech Credit Union}
+
+Balance over the last year to date :
+
+\insertplot{checking-1yearbalance}
+
+Balance during \monthname :
+
+\insertplot{checking-1monthbalance}
+
+Transactions for the last 7 days:
+
+\verbatiminput{build/checking-1trans.txt}
+
+\chapter{Net Worth}
 
 \begin{itemize}
 
-\item The balance of my assets to my liabilities gives my net worth (including retirement funds): 8056.19 USD
-\item Removing long term investment and loan accounts gives my net liquidity: 8056.19 USD
-\item Balancing expenses against income yields your cash flow, or net profit/loss(negative is profit, positive is loss): 8056.19 USD
+\item The balance of my assets to my liabilities gives my net worth (including retirement funds): \input{build/networth.txt}
+\item Removing long term investment and loan accounts gives my net liquidity: \input{build/liquidity.txt}
+\item Balancing expenses against income yields your cash flow, or net profit/loss(negative is profit, positive is loss): \input{build/cashflow.txt}
 
 \end{itemize}
+
+\chapter{Forecast}
+
+\section{First Tech Credit Union}
+
+\insertplot{checking-1forecast}
+
+\verbatiminput{build/checking-1forecast.txt}
 
 \end{document}
