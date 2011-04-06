@@ -81,6 +81,8 @@ def main(output_file, parameters):
     datemax = max(times) + daterange
     ax.set_xlim(datemin, datemax)
 
+    ax.set_ylim(min(values + [0.0]) * 1.1, max(values + [0.0]) * 1.1)
+
     # format the coords message box
     ax.format_xdata = mdates.DateFormatter('%Y-%m-%d')
     ax.format_ydata = price
