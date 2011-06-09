@@ -33,13 +33,13 @@ def main(output_loc, parameters):
     data_parameters = ['-F', '%(amount)\n', '-E', '--budget', '-p', 'this year', '-d', 'd < [this month]', '-M', 'reg'] + parameters
     parameters += ['-F', '%(account)\n', '-p', 'this month', '--flat', '--no-total', '--budget', '-M', 'bal', '^exp']
 
-    output = Popen(["/usr/local/bin/ledger"] + parameters, stdout=PIPE).communicate()[0]
+    output = Popen(["ledger"] + parameters, stdout=PIPE).communicate()[0]
     accounts = [acct for acct in output.split('\n') if acct != ""]
 
     data = []
     labels = []
     for acct in accounts:
-        output = Popen(["/usr/local/bin/ledger"] + data_parameters + ["^" + acct], stdout=PIPE).communicate()[0]
+        output = Popen(["ledger"] + data_parameters + ["^" + acct], stdout=PIPE).communicate()[0]
         values = []
         for value in output.split('\n'):
             if value == "":

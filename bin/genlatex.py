@@ -1,11 +1,15 @@
 #!/usr/bin/env python
-from subprocess import Popen,PIPE
+#-*- coding: UTF-8 -*-
+import re
 import sys
-import plot
 import pie
 import boxplot
-import ConfigParser
+import plot
+import codecs
 import getpass
+import pystache
+import ConfigParser
+from subprocess import Popen,PIPE
 
 config = ConfigParser.RawConfigParser()
 config.read('./examples/pdfledger.cfg')
@@ -18,7 +22,7 @@ else:
     #print "No user provided, using ", user
 
 commands = {}
-commands['accts'] = ['--collapse', '--no-total', 'balance']
+commands['accts'] = ['--collapse', '--no-total', '--basis', 'balance']
 commands['acctbudget'] = ['-E', '--flat', '--budget', '--no-total', 'balance']
 commands['budget'] = ['--flat', '--no-total', '-p', 'this month', 'budget']
 commands['retrospective'] = ['--flat', '--no-total', 'balance']
@@ -34,6 +38,8 @@ exclude['forecast'] = config.get(user, 'exclude_forecast').split(',')
 commands['networth'] = config.get(user, 'networth').split(',')
 commands['liquidity'] = config.get(user, 'liquidity').split(',')
 commands['cashflow'] = config.get(user, 'cashflow').split(',')
+commands['next12months'] += config.get(user, 'exchange').split(' ')
+commands['last12months'] += config.get(user, 'exchange').split(' ')
 #print "Exclude: ", exclude
 #print "Commands: ", commands
 
@@ -41,17 +47,28 @@ def tail(input):
     if(input[-1] == '\n'):
         input = input[:-1]
     input = input.split("\n")
-    return str(' '.join(input[-1:])).strip()
+    return unicode(' '.join(input[-1:])).strip()
 
 
-def runledger(cmd):
-    #print cmd
-    ledger = ["ledger", '-f', LEDGER_FILE, '-c']
-    output = Popen(ledger + cmd, stdout=PIPE).communicate()[0]
-    if(output[-1] == '\n'):
-        return output[:-1]
+def runledger(parameters):
+    command = ["ledger", '-f', LEDGER_FILE, '-c'] + parameters
+    #print ' '.join(command)
+    output = Popen(command, stdout=PIPE).communicate()[0]
+    if(len(output) > 0 and output[-1] == '\n'):
+        return unicode(output[:-1], 'UTF')
     else:
-        return output
+        return unicode(output, 'UTF')
+
+def safe_name(safename):
+    safename = re.sub('[ :]', '', safename)
+    safename = re.sub(u'ä', 'ae', safename)
+    safename = re.sub(u'ü', 'ue', safename)
+    safename = re.sub(u'ö', 'oe', safename)
+    safename = re.sub(u'ß', 'ss', safename)
+    safename = re.sub(u'Ä', 'Ae', safename)
+    safename = re.sub(u'Ü', 'Ue', safename)
+    safename = re.sub(u'Ö', 'Oe', safename)
+    return safename
 
 def retrospective(acct):
     rtnstring = ""
@@ -64,24 +81,20 @@ def retrospective(acct):
     subaccts = [subacct[1:] for subacct in subaccts]
 
     #Determine which accounts are excluded before iterating
-    excluded = [subacct for ex in exclude['retrospective'] for subacct in subaccts if (str(acct + ":" + subacct).find(ex) != -1)]
+    excluded = [subacct for ex in exclude['retrospective'] for subacct in subaccts if (unicode(acct + ":" + subacct).find(ex) != -1)]
     subaccts = [subacct for subacct in subaccts if (subacct not in excluded)]
 
-    if(len(subaccts) > 0):
-        rtnstring += "\section{Retrospectives}"
+    retro = []
     for subacct in subaccts:
         fullname = acct + ":" + subacct
         #print retrospective of subaccts with at least 7 transactions when viewed weekly over the last 12 months
         output = runledger(commands['last12months'] + ['-J', 'register'] + ["^" + fullname])
         if(len(output.split('\n')) < 6): continue
 
-        rtnstring += "\subsection{" + subacct + " Retrospective}"
-
-        safename = fullname
-        safename = safename.replace(' ', '')
-        plot.main("./build/" + safename + "retro", commands['last12months'] + ['-J', 'register'] + ["^" + fullname])
-        rtnstring += "\insertplot{" + safename + "retro}"
-    return rtnstring
+        safename = safe_name(fullname)
+        plot.main("./build/" + safename + "retro", commands['last12months'] + ['-J', 'register'] + ["^" + fullname] + ["-f", LEDGER_FILE])
+        retro.append({'name': subacct, 'plotfile': safename + "retro"})
+    return retro
 
 def forecast(acct):
     rtnstring = ""
@@ -94,32 +107,34 @@ def forecast(acct):
     subaccts = [subacct[1:] for subacct in subaccts]
 
     #Determine which accounts are excluded before iterating
-    excluded = [subacct for ex in exclude['forecast'] for subacct in subaccts if (str(acct + ":" + subacct).find(ex) != -1)]
+    excluded = [subacct for ex in exclude['forecast'] for subacct in subaccts if (unicode(acct + ":" + subacct).find(ex) != -1)]
     subaccts = [subacct for subacct in subaccts if (subacct not in excluded)]
 
-    if(len(subaccts) > 0):
-        rtnstring += "\section{Forecasts}"
+    forecast = []
     for subacct in subaccts:
         fullname = acct + ":" + subacct
-        #print forecast of budgeted accts
-        rtnstring += "\subsection{" + subacct + " Forecast}"
+        safename = safe_name(fullname)
+        file = "./build/" + safename + "forecast"
+        args = commands['next12months'] + ['-J', 'register'] + ["^" + fullname] + ["-f", LEDGER_FILE]
+        #print file, ' ', ' '.join(args)
+        plot.main(file, args)
+        #forecast.append({'name': subacct, 'plotfile': safename + "forecast"})
 
-        safename = fullname
-        safename = safename.replace(' ', '')
-        plot.main("./build/" + safename + "forecast", commands['next12months'] + ['-J', 'register'] + ["^" + fullname])
-        rtnstring += "\insertplot{" + safename + "forecast}"
-
-    return rtnstring
+    return forecast
 
 
 def main():
-    latex = ""
-    latex += header
+    mustache = {
+      'accounts': [],
+      'networth': tail(runledger(commands['networth'])).replace("Assets", ""),
+      'liquidity': tail(runledger(commands['liquidity'])).replace("Assets", ""),
+      'cashflow': tail(runledger(commands['cashflow']))
+    }
 
-    pie.main("./build/", ['-f', LEDGER_FILE, 'balance', 'Expenses'])
+    pie.main("./build/", ['-f', LEDGER_FILE, 'balance', '--basis', config.get(user, 'expenses_acct')])
     boxplot.main("./build/", ['-f', LEDGER_FILE])
     if(config.getboolean(user, 'budget')):
-        latex += budget
+        mustache['budget'] = runledger(commands['budget'])
 
     output = runledger(commands['accts'])
     accts = []
@@ -129,93 +144,23 @@ def main():
 
     for acct in accts:
         if(len([ex for ex in exclude['acct'] if (acct.find(ex) != -1)]) > 0): continue
-        latex += "\chapter{" + acct + "}"
 
-        latex += retrospective(acct)
+        account_data = {
+          'name': unicode(acct),
+          'retrospectives': retrospective(acct)
+        }
 
         if(config.getboolean(user, 'budget')):
-            latex += forecast(acct)
+          account_data['forecasts'] = forecast(acct)
 
-    latex += summary
+        mustache['accounts'].append(account_data)
 
-    latex += r"""\end{document}"""
-
-    f = open("build/pdfledger.tex", 'w')
-    f.write(latex)
-    f.close()
-
-    #print latex
-
-summary = r"""
-\chapter{Summary}
-
-\begin{itemize}
-
-\item The balance of my assets to my liabilities gives my net worth (including retirement funds): """ + tail(runledger(commands['networth'])).replace("Assets", "") + """
-\item Removing long term investment and loan accounts gives my net liquidity: """ + tail(runledger(commands['liquidity'])).replace("Assets", "") + """
-\item Balancing expenses against income yields your cash flow, or net profit/loss(negative is profit, positive is loss): """ + tail(runledger(commands['cashflow'])) + """
-
-\end{itemize}
-"""
-
-
-
-header = r"""
-\documentclass[pdftex,12pt,letterpaper]{report}
-\usepackage[pdftex]{graphicx}
-\usepackage[us, 12hr]{datetime}
-\usepackage{verbatim}
-\usepackage{moreverb}
-\usepackage[colorlinks=true]{hyperref}
-\let\verbatiminput=\verbatimtabinput %tabs are ignored in verbatim, this corrects for that
-\def\verbatimtabsize{4\relax} % set tabs=4 (else my output goes off the screen)
-\usepackage{fullpage}
-
-\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
-\newcommand{\insertplot}[1]{\includegraphics[width=0.9\linewidth, keepaspectratio=true]{build/#1}\\[1cm]}
-
-\begin{document}
-\input{templates/bettse/title.tex}
-
-\tableofcontents
-
-\chapter*{Introduction}
-
-"I kept account of every farthing I spent, and my expenses were carefully calculated. 
-Every little item, such as omnibus fares or postage or a couple of coppers spent on newspapers, would be entered, and the balance struck every evening before going to bed.
-That habit has stayed with me ever since, and I know that as a result, though I have had to handle public funds amounting to lakhs, I have succeeded in exercising strict economy in their disbursement, and instead of outstanding debts have had invariably a surplus balance in respect of all the movements I have led.
-Let every youth take a leaf out of my book and make it a point to account for everything that comes into and goes out of his pocket, and like me he is sure to be a gainer in the end.
-" -- M.K.Gandhi autobiography
-"""
-
-budget = r"""
-\chapter{Budget}
-
-\begin{figure}
-\caption{Breakdown of this months expenses}
-
-\insertplot{monthexpensepie}
-
-\end{figure}
-
-\begin{figure}
-\caption{Boxplot of expense variance this year}
-
-\insertplot{budget_boxplot}
-
-\end{figure}
-
-
-\section{Current month progress}
-
-Percentages are progress towards the budgeted amount.
-
-\begin{verbatim}
-""" + runledger(commands['budget']) + """
-\end{verbatim}
-"""
-
-
+    template_file = codecs.open(config.get(user, 'template_file'), encoding='utf-8', mode='r')
+    template_data = "".join(template_file.readlines())
+    template_file.close()
+    tex_file = codecs.open('build/pdfledger.tex', encoding='utf-8', mode='w')
+    tex_file.write(pystache.render(template_data, mustache))
+    tex_file.close()
 
 if __name__ == "__main__":
     main()

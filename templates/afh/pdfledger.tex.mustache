@@ -1,0 +1,101 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{verbatim}
+\usepackage{fontspec}
+\usepackage{fullpage}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage[german]{babel}
+\usepackage[24hr]{datetime}
+\usepackage[latin1]{inputenc}
+\hypersetup{pdftitle={PDF Ledger}}
+\let\verbatiminput=\verbatimtabinput %tabs are ignored in verbatim, this corrects for that
+\def\verbatimtabsize{2\relax} % set tabs=4 (else my output goes off the screen)
+
+\setmonofont{Bitstream Vera Sans Mono}
+\lstset{basicstyle=\ttfamily\tiny,frame=single}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\newcommand{\insertplot}[1]{\includegraphics[width=0.9\linewidth, keepaspectratio=true]{build/#1}\\[1cm]}
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+% Header
+\includegraphics[width=0.33\textwidth]{templates/afh/logo.pdf}\\[1cm]
+\textsc{\LARGE Bestandsbuch}\\[1.5cm]
+\textsc{\Large afh}\\[0.5cm]
+% Title
+\HRule\\[0.4cm]
+{\huge \bfseries Übersicht meiner Finanzen}\\[0.4cm]
+\HRule \\[1.5cm]
+\vfill
+% Footer
+{\large%
+\today%
+%\currenttime%
+}
+\\[4cm]
+{\tiny%
+Logo based on icons by %
+\href{http://picol.org}{\raisebox{-2.5pt}{\includegraphics[width=1.5cm]{templates/afh/picol.pdf}}}%
+}
+\end{center}
+\end{titlepage}
+
+
+%\tableofcontents
+
+\chapter*{Einleitung}
+\begin{quote}
+\textit{``Erfolge bringen Erfolg hervor, genau wie Geld das Geld vermehrt.''}\\[0.5\baselineskip]
+\raggedleft– Nicolas-Sébastien de Chamfort\\
+\tiny{(Maximes et Pensées, Caractères et Anecdotes)}
+\end{quote}
+
+
+\chapter{Budget}
+\begin{figure}
+\caption{Kostenaufschlüsselung des aktuellen Monats}
+\insertplot{monthexpensepie}
+\end{figure}
+
+\begin{lstlisting}
+{{budget}}
+\end{lstlisting}
+
+
+{{#accounts}}
+\chapter{ {{name}} }
+
+{{#retrospectives?}}
+\section{Rückblick}
+{{/retrospectives?}}
+{{#retrospectives}}
+\subsection{ {{name}} }
+{{=[[ ]]=}}
+\insertplot{[[plotfile]]}
+[[={{ }}=]]
+{{/retrospectives}}
+
+{{#forecasts?}}
+\section{Prognose}
+{{/forecasts?}}
+{{#forecasts}}
+\subsection{ {{name}} }
+{{=[[ ]]=}}
+\insertplot{[[plotfile]]}
+[[={{ }}=]]
+{{/forecasts}}
+
+{{/accounts}}
+
+\chapter{ Zusammenfassung }
+\begin{itemize}
+\item Die Bilanz meiner Aktiva zu meinen Passiva zeigt den Netto Wert: {{networth}}
+\item Abzüglich langfristiger Investitionen und dem Darlehenskonto beträgt meine Liquidität {{liquidity}}
+\item Die Ausgaben mit den Einnahmen zu verrechnen zeigt den Kapitalfluss, oder den Netto-Gewinn, bzw. -Verlust (negativ = Gewinn, positiv = Verlust): {{cashflow}}
+\end{itemize}
+
+\end{document}

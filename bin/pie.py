@@ -19,14 +19,22 @@ import sys
 
 def main(output_loc, parameters):
     parameters += ['-p', 'this month','--flat', '--no-total']
-    output = Popen(["ledger"] + parameters, stdout=PIPE).communicate()[0]
+    command = ["ledger"] + parameters
+    #print ' '.join(command)
+    output = Popen(command, stdout=PIPE).communicate()[0]
     labels = []
     values = []
     for line in output.split('\n'):
         if(line == ""):
             continue
-        values.append(float(line.split()[0]))
-        label = line.split()[2]
+        fields = line.split()
+        if(len(fields) != 3):
+          continue
+        amount = fields[1]
+        if (amount[-3] == ','):
+          amount = amount.replace('.', '').replace(',', '.')
+        values.append(float(amount))
+        label = fields[2]
         labels.append(label.split(':')[-1])
 
     # make a square figure and axes

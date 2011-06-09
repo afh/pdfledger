@@ -43,7 +43,9 @@ daysFmt = mdates.DateFormatter('%m/%d')
 moneyFmt = ticker.FuncFormatter(price)
 
 def main(output_file, parameters):
-    output = Popen(["ledger"] + parameters, stdout=PIPE).communicate()[0]
+    command = ["ledger"] + parameters
+    #print ' '.join(command)
+    output = Popen(command, stdout=PIPE).communicate()[0]
     times = []
     values = []
     for line in output.split('\n'):
@@ -51,6 +53,9 @@ def main(output_file, parameters):
             continue
         times.append(datetime.datetime.strptime(line.split()[0], "%Y-%m-%d"))
         values.append(float(line.split()[1].replace(',', '.')))
+
+    if len(times) == 0:
+      return
 
     fig = plt.figure()
     ax = fig.add_subplot(111)

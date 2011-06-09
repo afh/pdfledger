@@ -1,21 +1,24 @@
 LATEX="xelatex"
 PDFLEDGER="templates/afh/pdfledger.tex"
 CABINET="/Users/bettse/Dropbox/Virtual Filing Cabinet/"
+BUILD="build"
 
-USER=$(shell whoami)
-ifeq '$(USER)' 'bettse'
-PDFLEDGER="build/pdfledger.tex"
+ifeq '${USER}' 'bettse'
 LATEX="pdflatex"
+PDFLEDGER="$(BUILD)/pdfledger.tex"
 endif
 
-default:
-	@$(LATEX) --enable-write18 -shell-escape --output-directory=build $(PDFLEDGER)
+default: genlatex
+	@$(LATEX) --enable-write18 -shell-escape --output-directory=build $(BUILD)/pdfledger.tex
 
 genlatex:
 	@./bin/genlatex.py
 
 file: default
-	@cp build/pdfledger.pdf $(CABINET)/Bank
+	@cp $(BUILD)/pdfledger.pdf $(CABINET)/Bank
+
+init:
+	mkdir -p $(BUILD)
 
 clean:
-	rm -f build/*
+	rm -f $(BUILD)/*
