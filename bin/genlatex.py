@@ -3,6 +3,7 @@ from subprocess import Popen,PIPE
 import sys
 import plot
 import pie
+import boxplot
 import ConfigParser
 import getpass
 
@@ -116,6 +117,7 @@ def main():
     latex += header
 
     pie.main("./build/", ['-f', LEDGER_FILE, 'balance', 'Expenses'])
+    boxplot.main("./build/", ['-f', LEDGER_FILE])
     if(config.getboolean(user, 'budget')):
         latex += budget
 
@@ -195,6 +197,14 @@ budget = r"""
 \insertplot{monthexpensepie}
 
 \end{figure}
+
+\begin{figure}
+\caption{Boxplot of expense variance this year}
+
+\insertplot{budget_boxplot}
+
+\end{figure}
+
 
 \section{Current month progress}
 
