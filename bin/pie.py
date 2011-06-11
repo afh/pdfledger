@@ -26,10 +26,12 @@ def main(output_loc, parameters):
         if(line == ""):
             continue
         values.append(float(line.split()[0]))
-        labels.append(line.split()[2])
+        label = line.split()[2]
+        labels.append(label.split(':')[-1])
 
     # make a square figure and axes
-    figure(1, figsize=(8,8))
+    figure(figsize=(8,8), frameon=False)
+
     ax = axes([0.1, 0.1, 0.8, 0.8])
 
     pie(values, explode=None, labels=labels, autopct='%1.1f%%', shadow=False)
