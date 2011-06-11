@@ -61,7 +61,7 @@ def main(output_file, parameters):
     if(daterange < 15 ):
         ax.xaxis.set_major_locator(days)
         ax.xaxis.set_major_formatter(daysFmt)
-    if(daterange < 35 ):
+    elif(daterange < 35 ):
         ax.xaxis.set_major_locator(weeks)
         ax.xaxis.set_major_formatter(daysFmt)
     elif(daterange < 90):
