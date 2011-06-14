@@ -62,7 +62,7 @@ def main(output_loc, parameters):
     fig.autofmt_xdate()
     ax.set_xticklabels(labels)
 
-    savefig(output_loc+"budget_boxplot.pdf")
+    savefig(output_loc+"budgetboxplot.pdf")
 
 
 
