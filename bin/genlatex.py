@@ -49,6 +49,8 @@ def tail(input):
     input = input.split("\n")
     return unicode(' '.join(input[-1:])).strip()
 
+def sanatize(money):
+    return money.replace('$','').replace(',','').strip()
 
 def runledger(parameters):
     command = ["ledger", '-f', LEDGER_FILE, '-c'] + parameters
@@ -126,9 +128,9 @@ def forecast(acct):
 def main():
     mustache = {
       'accounts': [],
-      'networth': tail(runledger(commands['networth'])).replace("Assets", ""),
-      'liquidity': tail(runledger(commands['liquidity'])).replace("Assets", ""),
-      'cashflow': tail(runledger(commands['cashflow']))
+      'networth': sanatize(tail(runledger(commands['networth'])).replace("Assets", "")),
+      'liquidity': sanatize(tail(runledger(commands['liquidity'])).replace("Assets", "")),
+      'cashflow': sanatize(tail(runledger(commands['cashflow'])))
     }
 
     pie.main("./build/", ['-f', LEDGER_FILE, 'balance', '--basis', config.get(user, 'expenses_acct')])
