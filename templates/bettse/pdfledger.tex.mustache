@@ -34,19 +34,18 @@ Let every youth take a leaf out of my book and make it a point to account for ev
 
 \chapter{Budget}
 
+\section{Current month progress}
+
 \begin{figure}
 \caption{Breakdown of this months expenses}
 \insertplot{monthexpensepie}
 \end{figure}
 
-\verbatiminput{/Users/bettse/Dropbox/Finances/budget.lgr}
-
 \begin{figure}
 \caption{Boxplot of expense variance this year}
-\inspertplot{budget_boxplot}
+\inspertplot{budgetboxplot}
 \end{figure}
 
-\section{Current month progress}
 
 Percentages are progress towards the budgeted amount.
 
@@ -54,35 +53,11 @@ Percentages are progress towards the budgeted amount.
 {{budget}}
 \end{lstlisting}
 
-%\chapter{Assets}
-%
-%\verbatiminput{build/assets.txt}
-%
-%\chapter{Liabilities}
-%
-%\verbatiminput{build/liabilities.txt}
-%
-%\chapter{Transactions}
-%
-%\section{First Tech Credit Union}
-%
-%Balance over the last year to date :
-%
-%\insertplot{checking-1yearbalance}
-%
-%Balance during \monthname :
-%
-%\insertplot{checking-1monthbalance}
-%
-%Transactions for the last 7 days:
-%
-%\verbatiminput{build/checking-1trans.txt}
-
 {{#accounts}}
 \chapter{ {{name}} }
 
 {{#retrospectives?}}
-\section{Rückblick}
+\section{Retrospective}
 {{/retrospectives?}}
 {{#retrospectives}}
 \subsection{ {{name}} }
@@ -92,7 +67,7 @@ Percentages are progress towards the budgeted amount.
 {{/retrospectives}}
 
 {{#forecasts?}}
-\section{Prognose}
+\section{Forecast}
 {{/forecasts?}}
 {{#forecasts}}
 \subsection{ {{name}} }
@@ -108,7 +83,9 @@ Percentages are progress towards the budgeted amount.
 \begin{itemize}
 
 \item The balance of my assets to my liabilities gives my net worth (including retirement funds): {{networth}}
+
 \item Removing long term investment and loan accounts gives my net liquidity: {{liquidity}}
+
 \item Balancing expenses against income yields your cash flow, or net profit/loss(negative is profit, positive is loss): {{cashflow}}
 
 \end{itemize}
