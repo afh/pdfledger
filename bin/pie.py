@@ -16,9 +16,12 @@ from pylab import *
 from subprocess import Popen,PIPE
 import sys
 
+def sanatize(money):
+    return money.replace('$','').replace(',','').strip()
+
 
 def main(output_loc, parameters):
-    parameters += ['-p', 'this month','--flat', '--no-total']
+    parameters += ['-p', 'this month','--flat', '--no-total', '-F', '%(account)\t%(amount)\n']
     command = ["ledger"] + parameters
     #print ' '.join(command)
     output = Popen(command, stdout=PIPE).communicate()[0]
@@ -27,14 +30,9 @@ def main(output_loc, parameters):
     for line in output.split('\n'):
         if(line == ""):
             continue
-        fields = line.split()
-        if(len(fields) != 3):
-          continue
-        amount = fields[1]
-        if (amount[-3] == ','):
-          amount = amount.replace('.', '').replace(',', '.')
-        values.append(float(amount))
-        label = fields[2]
+        fields = line.split('\t')
+        label = fields[0]
+        values.append(float(sanatize(fields[1])))
         labels.append(label.split(':')[-1])
 
     # make a square figure and axes
