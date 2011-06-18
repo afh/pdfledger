@@ -1,0 +1,17 @@
+h1. PdfLedger
+
+A collection of python scripts to create a ledger PDF file.
+
+
+h2. Requirements
+
+* "ledger":http://ledger-cli.org/
+* "python":http://www.python.org/ >= 2.6
+* "matplotlib":http://matplotlib.sourceforge.net/
+* "pystache":https://github.com/defunkt/pystache
+* "LaTeX":http://www.latex-project.org/
+
+
+h2. Credits
+
+Thanks to "bettse":https://github.com/bettse/ for the work in the initial commit that started the whole project.
